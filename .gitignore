@@ -13,6 +13,7 @@
 /frontend/node_modules/
 /frontend/.env
 /frontend/dist/
+/frontend/package-lock.json
 
 # Sistema
 .DS_Store
