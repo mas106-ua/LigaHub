@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
-import { registerUser } from "../auth";
+import { registerUser } from "../api/auth";
 
 export default function Register() {
   const [form, setForm] = useState({
