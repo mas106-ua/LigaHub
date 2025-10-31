@@ -1,4 +1,3 @@
-// src/api.js
 import axios from "axios";
 
 const api = axios.create({
@@ -8,13 +7,11 @@ const api = axios.create({
   xsrfHeaderName: "X-XSRF-TOKEN", 
 });
 
-// (opcional) interceptor 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       console.warn("No autorizado. Redirigiendo al login...");
-      // window.location.href = "/login";
     }
     return Promise.reject(error);
   }

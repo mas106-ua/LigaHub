@@ -4,10 +4,31 @@
   --color-secondary: #FFD100;
   --color-success: #3BB273;
   --color-danger: #D7263D;
-  --color-light: #F5F6FA;
+
+  /* 👇 Fondo general más neutro y suave */
+  --color-light: #F3F4F6;
   --color-dark: #1E1E1E;
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: var(--color-light);
+  font-family: var(--font-sans);
+  color: var(--color-dark);
+  margin: 0;
+  padding: 0;
+}
+
+/* Opcional: mejora las cards para que destaquen */
+.card {
+  background-color: #fff;
+  border-radius: 1.25rem;
+  border: none;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
 }
 
 /* ======================================
@@ -50,13 +71,6 @@ body {
   background-color: var(--color-danger);
   color: #fff;
   border: none;
-}
-
-/* Tarjetas */
-.card {
-  border-radius: 1.25rem;
-  border: none;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
 }
 
 /* Inputs */
