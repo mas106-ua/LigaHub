@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         CategoriesSeeder::class,
         SeasonsSeeder::class,
         LeaguesDemoSeeder::class,
+        SuperAdminSeeder::class,
     ]);
     }
 }

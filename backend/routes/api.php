@@ -16,4 +16,15 @@ Route::post('/auth/login', [LoginController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn (Request $r) => $r->user());
     Route::post('/auth/logout', [LogoutController::class, 'destroy']);
+    Route::get('/admin/dashboard', function () {
+        return response()->json([
+            'message' => 'Hola superadmin',
+        ]);
+    })->middleware('role:superadmin');
+
+    Route::get('/admin/stats', function () {
+        return response()->json([
+            'message' => 'Stats visibles para superadmin y admin',
+        ]);
+    })->middleware('role:superadmin,admin');
 });
