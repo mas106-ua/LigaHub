@@ -2,18 +2,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
-// tu register ya lo tienes
 import Register from "./pages/Register";
 import RequireAuth from "./components/RequireAuth";
 import AppLayout from "./layouts/AppLayout";
-
-function HomePage() {
-  return <h1 className="text-2xl font-bold">Home privada ✅</h1>;
-}
-
-function DashboardPage() {
-  return <h1 className="text-2xl font-bold">Dashboard</h1>;
-}
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard"
 
 export default function App() {
   return (
@@ -32,8 +25,8 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             {/* más privadas aquí */}
           </Route>
 

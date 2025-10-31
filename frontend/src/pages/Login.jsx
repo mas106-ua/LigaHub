@@ -1,17 +1,15 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Spinner } from "react-bootstrap";
 
 export default function Login() {
   const { login, authLoading } = useAuth();
-  const [email, setEmail] = useState("mario@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-
-  // por si venía de /login?next=/dashboard
   const from = location.state?.from?.pathname || "/";
 
   async function handleSubmit(e) {
@@ -22,59 +20,85 @@ export default function Login() {
     if (res.ok) {
       navigate(from, { replace: true });
     } else {
-      setError(res.message || "Error de login");
+      setError(res.message || "Error de inicio de sesión");
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <div className="bg-white shadow rounded p-6 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
-        {error ? (
-          <p className="mb-3 text-sm text-red-600">{error}</p>
-        ) : null}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full border rounded px-3 py-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="password">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full border rounded px-3 py-2"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={authLoading}
-            className="w-full bg-slate-800 text-white py-2 rounded hover:bg-slate-900 disabled:opacity-60"
-          >
-            {authLoading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "100vh", backgroundColor: "var(--color-light)" }}
+    >
+      <div
+        className="shadow-lg"
+        style={{
+          width: "100%",
+          maxWidth: "440px",
+          background: "#fff",
+          borderRadius: "1.25rem",
+        }}
+      >
+        <div
+          style={{
+            background: "linear-gradient(135deg, #C8102E 0%, #990021 100%)",
+            color: "#fff",
+            borderTopLeftRadius: "1.25rem",
+            borderTopRightRadius: "1.25rem",
+            padding: "1.75rem 1.5rem 1.5rem",
+          }}
+        >
+          <h3 className="mb-1 fw-semibold">Iniciar sesión</h3>
+        </div>
 
-        <p className="mt-4 text-sm text-center">
-          ¿No tienes cuenta?{" "}
-          <Link className="text-slate-700 underline" to="/register">
-            Regístrate
-          </Link>
-        </p>
+        <div className="p-4">
+          {error && <p className="text-danger small mb-3">{error}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-control"
+                placeholder="tu@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label">Contraseña</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+              disabled={authLoading}
+            >
+              {authLoading ? (
+                <>
+                  <Spinner animation="border" size="sm" /> Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </button>
+          </form>
+
+          <p className="text-center mt-3 mb-0" style={{ fontSize: "0.9rem" }}>
+            ¿No tienes cuenta?{" "}
+            <Link to="/register" className="fw-semibold text-primary">
+              Regístrate
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
