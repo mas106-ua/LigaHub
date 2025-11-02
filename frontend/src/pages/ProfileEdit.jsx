@@ -28,7 +28,13 @@ export default function ProfileEdit() {
       try {
         const me = await getProfile();
         setName(me.name || "");
-        setAvatarUrl(me.avatar_url || null);
+        if (me.avatar_url) {
+            const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "");
+            const full = me.avatar_url.startsWith("http")
+            ? me.avatar_url
+            : `${API_BASE}${me.avatar_url}`;
+            setAvatarUrl(full);
+        }
       } catch {
         // ignore
       }
@@ -48,8 +54,15 @@ export default function ProfileEdit() {
     try {
       const { user } = await updateProfile({ name: name.trim(), avatarFile });
       setMsgData({ type: "success", text: "Perfil actualizado correctamente." });
-      if (user?.avatar_url) setAvatarUrl(user.avatar_url);
-      // si quieres, refresca el user global con getCurrentUser()
+      if (user?.avatar_url) {
+        const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "");
+        const full = user.avatar_url.startsWith("http")
+            ? user.avatar_url
+            : `${API_BASE}${user.avatar_url}`;
+        setAvatarUrl(full);
+        // y refrescamos el contexto:
+        await refreshUser?.(); // si lo expusiste en el contexto
+        }
       await getCurrentUser().catch(() => {});
         if (user) {
         updateLocalUser(user);         // ya tenemos el user actualizado

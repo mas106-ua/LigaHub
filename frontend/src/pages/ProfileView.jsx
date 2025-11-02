@@ -11,6 +11,12 @@ export default function ProfileView() {
     (async () => {
       try {
         const data = await getProfile(); // { id, name, email, role, avatar_url }
+        const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "");
+        if (data.avatar_url) {
+        data.avatar_url = data.avatar_url.startsWith("http")
+            ? data.avatar_url
+            : `${API_BASE}${data.avatar_url}`;
+        }
         setMe(data);
       } finally {
         setLoading(false);

@@ -2,6 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { Outlet, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "");
 
 export default function AppLayout() {
   const { user, loading, logout } = useAuth();
@@ -74,23 +75,42 @@ export default function AppLayout() {
               className="d-flex align-items-center gap-2 bg-white text-dark px-3 py-1 rounded-pill border-0"
               style={{ fontSize: "0.8rem", cursor: "pointer" }}
             >
-              <div
-                style={{
-                  width: "26px",
-                  height: "26px",
-                  borderRadius: "9999px",
-                  backgroundColor: "rgba(200,16,46,.12)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                  color: "#C8102E",
-                  fontSize: "0.75rem",
-                  textTransform: "uppercase",
-                }}
-              >
-                {user?.name ? user.name[0] : "U"}
-              </div>
+              {/* Avatar o inicial */}
+              {user?.avatar_url ? (
+                <img
+                  src={
+                    user.avatar_url.startsWith("http")
+                      ? user.avatar_url
+                      : `${API_BASE}${user.avatar_url}`
+                  }
+                  alt={user.name}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: "9999px",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "9999px",
+                    backgroundColor: "rgba(200,16,46,.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    color: "#C8102E",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {user?.name ? user.name[0] : "U"}
+                </div>
+              )}
+
               <span>{user?.name || "Usuario"}</span>
               <span style={{ fontSize: "0.7rem" }}>▾</span>
             </button>
