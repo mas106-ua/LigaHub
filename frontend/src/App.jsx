@@ -7,6 +7,8 @@ import RequireAuth from "./components/RequireAuth";
 import AppLayout from "./layouts/AppLayout";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard"
+import Forbidden from "./pages/Forbidden";
+import RequireRole from "./components/RequireRole";
 
 export default function App() {
   return (
@@ -16,6 +18,7 @@ export default function App() {
           {/* públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forbidden" element={<Forbidden />} />
 
           {/* privadas */}
           <Route
@@ -25,8 +28,17 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Home autenticado */}
+            <Route index element={<Home />} />
+            {/* admin-only */}
+            <Route
+              path="dashboard"
+              element={
+                <RequireRole roles="superadmin">
+                  <Dashboard />
+                </RequireRole>
+              }
+            />
             {/* más privadas aquí */}
           </Route>
 

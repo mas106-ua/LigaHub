@@ -3,7 +3,7 @@ import { Outlet, NavLink } from "react-router-dom";
 import { useState } from "react";
 
 export default function AppLayout() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
@@ -47,17 +47,21 @@ export default function AppLayout() {
               >
                 Home
               </NavLink>
-              <NavLink
-                to="/dashboard"
-                className={({ isActive }) =>
-                  "text-decoration-none " +
-                  (isActive
-                    ? "text-white fw-semibold border-bottom border-warning pb-1"
-                    : "text-white-50 hover:text-white")
-                }
-              >
-                Dashboard
-              </NavLink>
+
+              {/* Solo mostrar cuando ya se cargó el user y es superadmin */}
+              {!loading && user?.role === "superadmin" && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    "text-decoration-none " +
+                    (isActive
+                      ? "text-white fw-semibold border-bottom border-warning pb-1"
+                      : "text-white-50 hover:text-white")
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              )}
             </nav>
           </div>
 
