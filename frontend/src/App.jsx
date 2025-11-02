@@ -7,6 +7,8 @@ import RequireAuth from "./components/RequireAuth";
 import AppLayout from "./layouts/AppLayout";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard"
+import ProfileView from "./pages/ProfileView";
+import ProfileEdit from "./pages/ProfileEdit";
 import Forbidden from "./pages/Forbidden";
 import RequireRole from "./components/RequireRole";
 
@@ -40,6 +42,8 @@ export default function App() {
               }
             />
             {/* más privadas aquí */}
+            <Route path="profile" element={<ProfileView />} />
+            <Route path="profile/edit" element={<ProfileEdit />} />
           </Route>
 
           {/* opcional: 404 */}
