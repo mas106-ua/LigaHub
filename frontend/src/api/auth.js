@@ -49,22 +49,11 @@ export async function getCurrentUser() {
   // a veces no hace falta csrf aquí, pero lo dejamos por si acaso
   await getCsrf();
 
-  const { data } = await api.get("/api/user");
+  const { data } = await api.get("/api/user", { withCredentials: true });
   return data;
 }
 
 // LOGOUT
 export async function logoutUser() {
-  await getCsrf();
-  const token = getCookie("XSRF-TOKEN");
-
-  await api.post(
-    "/api/auth/logout",
-    {},
-    {
-      headers: {
-        "X-XSRF-TOKEN": token,
-      },
-    }
-  );
+  await api.post("/api/auth/logout", {}, { withCredentials: true });
 }

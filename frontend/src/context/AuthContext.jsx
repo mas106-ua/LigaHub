@@ -45,16 +45,13 @@ export function AuthProvider({ children }) {
   const login = useCallback(async ({ email, password }) => {
     setAuthLoading(true);
     try {
-      const data = await loginUser({ email, password });
-      setUser(data.user);
+      await loginUser({ email, password });
+      // refresca el usuario para incluir su rol
+      const u = await getCurrentUser();
+      setUser(u);
       return { ok: true };
     } catch (error) {
-      return {
-        ok: false,
-        message:
-          error?.response?.data?.message || "No se pudo iniciar sesión.",
-        errors: error?.response?.data?.errors || null,
-      };
+      // ...
     } finally {
       setAuthLoading(false);
     }
