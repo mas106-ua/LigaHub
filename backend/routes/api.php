@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -27,4 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
             'message' => 'Stats visibles para superadmin y admin',
         ]);
     })->middleware('role:superadmin,admin');
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
