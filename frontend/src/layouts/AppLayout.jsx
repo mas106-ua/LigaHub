@@ -1,6 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { Outlet, NavLink } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function AppLayout() {
   const { user, loading, logout } = useAuth();
@@ -108,6 +109,15 @@ export default function AppLayout() {
                   zIndex: 10,
                 }}
               >
+                <Link
+                  to="/profile"
+                  onClick={() => setOpen(false)}
+                  className="w-100 d-block text-decoration-none text-dark px-3 py-2"
+                  style={{ fontSize: "0.85rem" }}
+                >
+                  Ver perfil
+                </Link>
+                
                 <button
                   onClick={logout}
                   className="w-100 text-start px-3 py-2 bg-white border-0"

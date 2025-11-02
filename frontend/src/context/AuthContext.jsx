@@ -42,6 +42,21 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const u = await getCurrentUser();
+      setUser(u);
+      return u;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  // actualiza solo en memoria (cuando ya tienes el user devuelto por la API)
+  const updateLocalUser = useCallback((partial) => {
+    setUser((prev) => (prev ? { ...prev, ...partial } : prev));
+  }, []);
+
   const login = useCallback(async ({ email, password }) => {
     setAuthLoading(true);
     try {
@@ -78,6 +93,8 @@ export function AuthProvider({ children }) {
         authLoading,
         login,
         logout,
+        refreshUser,
+        updateLocalUser,
       }}
     >
       {children}
