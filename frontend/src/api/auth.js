@@ -55,5 +55,16 @@ export async function getCurrentUser() {
 
 // LOGOUT
 export async function logoutUser() {
-  await api.post("/api/auth/logout", {}, { withCredentials: true });
+  await getCsrf();                            // 1) asegura XSRF-TOKEN
+  const token = getCookie("XSRF-TOKEN");      // 2) léelo
+
+  // 3) envía el header y credenciales (cookie de sesión)
+  await api.post(
+    "/api/auth/logout",
+    {},
+    {
+      headers: { "X-XSRF-TOKEN": token },
+      withCredentials: true,
+    }
+  );
 }

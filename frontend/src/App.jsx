@@ -11,43 +11,41 @@ import ProfileView from "./pages/ProfileView";
 import ProfileEdit from "./pages/ProfileEdit";
 import Forbidden from "./pages/Forbidden";
 import RequireRole from "./components/RequireRole";
+import RequireGuest from "./components/RequireGuest";
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* públicas */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forbidden" element={<Forbidden />} />
-
-          {/* privadas */}
-          <Route
-            element={
-              <RequireAuth>
-                <AppLayout />
-              </RequireAuth>
-            }
-          >
+          <Route element={<AppLayout />}>
+            {/* públicas */}
             {/* Home autenticado */}
             <Route index element={<Home />} />
-            {/* admin-only */}
-            <Route
-              path="dashboard"
-              element={
-                <RequireRole roles="superadmin">
-                  <Dashboard />
-                </RequireRole>
-              }
-            />
-            {/* más privadas aquí */}
-            <Route path="profile" element={<ProfileView />} />
-            <Route path="profile/edit" element={<ProfileEdit />} />
-          </Route>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forbidden" element={<Forbidden />} />
 
-          {/* opcional: 404 */}
-          <Route path="*" element={<p>404</p>} />
+            {/* privadas */}
+            <Route
+            >
+              {/* admin-only */}
+              <Route
+                path="dashboard"
+                element={
+                  <RequireRole roles="superadmin">
+                    <Dashboard />
+                  </RequireRole>
+                }
+              />
+              {/* más privadas aquí */}
+              <Route path="profile" element={<ProfileView />} />
+              <Route path="profile/edit" element={<ProfileEdit />} />
+            </Route>
+
+            {/* opcional: 404 */}
+            <Route path="*" element={<p>404</p>} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
