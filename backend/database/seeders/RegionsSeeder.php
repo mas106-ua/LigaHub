@@ -9,26 +9,30 @@ class RegionsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('regions')->insert([
-            ['name' => 'Andalucía', 'code' => 'AN'],
-            ['name' => 'Aragón', 'code' => 'AR'],
-            ['name' => 'Asturias', 'code' => 'AS'],
-            ['name' => 'Islas Baleares', 'code' => 'IB'],
-            ['name' => 'Canarias', 'code' => 'CN'],
-            ['name' => 'Cantabria', 'code' => 'CB'],
-            ['name' => 'Castilla y León', 'code' => 'CL'],
-            ['name' => 'Castilla-La Mancha', 'code' => 'CM'],
-            ['name' => 'Cataluña', 'code' => 'CT'],
-            ['name' => 'Comunidad Valenciana', 'code' => 'CV'],
-            ['name' => 'Extremadura', 'code' => 'EX'],
-            ['name' => 'Galicia', 'code' => 'GA'],
-            ['name' => 'Madrid', 'code' => 'MD'],
-            ['name' => 'Murcia', 'code' => 'MU'],
-            ['name' => 'Navarra', 'code' => 'NA'],
-            ['name' => 'País Vasco', 'code' => 'PV'],
-            ['name' => 'La Rioja', 'code' => 'LR'],
-            ['name' => 'Ceuta', 'code' => 'CE'],
-            ['name' => 'Melilla', 'code' => 'ML'],
-        ]);
+        $regions = [
+            ['name' => 'Andalucía',            'code' => 'AND'],
+            ['name' => 'Aragón',               'code' => 'ARA'],
+            ['name' => 'Principado de Asturias','code' => 'AST'],
+            ['name' => 'Illes Balears',        'code' => 'BAL'],
+            ['name' => 'Canarias',             'code' => 'CAN'],
+            ['name' => 'Cantabria',            'code' => 'CANT'],
+            ['name' => 'Castilla-La Mancha',   'code' => 'CLM'],
+            ['name' => 'Castilla y León',      'code' => 'CYL'],
+            ['name' => 'Cataluña',             'code' => 'CAT'],
+            ['name' => 'Comunitat Valenciana', 'code' => 'CV'],
+            ['name' => 'Extremadura',          'code' => 'EXT'],
+            ['name' => 'Galicia',              'code' => 'GAL'],
+            ['name' => 'Comunidad de Madrid',  'code' => 'MAD'],
+            ['name' => 'Región de Murcia',     'code' => 'MUR'],
+            ['name' => 'Navarra',              'code' => 'NAV'],
+            ['name' => 'La Rioja',             'code' => 'RIO'],
+            ['name' => 'País Vasco',           'code' => 'PVA'],
+            ['name' => 'Ceuta',                'code' => 'CEU'],
+            ['name' => 'Melilla',              'code' => 'MEL'],
+        ];
+
+        foreach ($regions as $r) {
+            DB::table('regions')->updateOrInsert(['code' => $r['code']], $r);
+        }
     }
 }
