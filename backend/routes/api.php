@@ -6,12 +6,16 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\CompetitionController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
 // Auth pública
 Route::post('/auth/register', RegisterController::class);
 Route::post('/auth/login', [LoginController::class, 'store']);
+Route::get('/regions', [RegionController::class, 'index']);
+Route::get('/competitions', [CompetitionController::class, 'index']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {
