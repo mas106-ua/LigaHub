@@ -14,6 +14,8 @@ class CompetitionIndexRequest extends FormRequest
             'search'   => ['nullable', 'string', 'max:150'],
             'page'     => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
+            'gender'   => ['nullable','in:male,female,mixed'],        
+            'level'    => ['nullable','in:pro,semi,amateur'],          
         ];
     }
     public function authorize(): bool { return true; }

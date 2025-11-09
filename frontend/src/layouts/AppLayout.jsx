@@ -38,27 +38,19 @@ export default function AppLayout() {
         >
           {/* IZQUIERDA */}
           <div className="d-flex align-items-center gap-4">
-            <span className="fw-bold" style={{ fontSize: "1.05rem" }}>
-              TFG Fútbol
-            </span>
+            <img
+                src="/img/logo_rfef.png"
+                alt="TFG Fútbol"
+                width={30}     // ajusta a tu gusto
+                height="auto"
+                style={{ display: "block" }}
+            />
 
-            <nav className="d-flex gap-3">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  "text-decoration-none " +
-                  (isActive
-                    ? "text-white fw-semibold border-bottom border-warning pb-1"
-                    : "text-white-50 hover:text-white")
-                }
-              >
-                Home
-              </NavLink>
-
-              {!loading && user?.role === "superadmin" && (
+            {!loading && user?.role === "superadmin" && (
+              <nav className="d-flex gap-3">
                 <NavLink
-                  to="/dashboard"
+                  to="/"
+                  end
                   className={({ isActive }) =>
                     "text-decoration-none " +
                     (isActive
@@ -66,10 +58,22 @@ export default function AppLayout() {
                       : "text-white-50 hover:text-white")
                   }
                 >
-                  Dashboard
+                  Home
                 </NavLink>
-              )}
-            </nav>
+
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                      "text-decoration-none " +
+                      (isActive
+                        ? "text-white fw-semibold border-bottom border-warning pb-1"
+                        : "text-white-50 hover:text-white")
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+              </nav>
+            )}
           </div>
 
           {/* DERECHA */}
