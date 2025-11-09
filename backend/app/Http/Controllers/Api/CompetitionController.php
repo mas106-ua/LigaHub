@@ -16,6 +16,8 @@ class CompetitionController extends Controller
         $season  = (string) $request->query('season', '');
         $search  = (string) $request->query('search', '');
         $perPage = (int) $request->query('per_page', 12);
+        $gender  = (string) $request->query('gender', ''); 
+        $level   = (string) $request->query('level', '');  
 
         $query = League::query()
             ->select('leagues.*')
@@ -34,6 +36,13 @@ class CompetitionController extends Controller
 
         if ($search !== '') {
             $query->where('leagues.name', 'like', '%'.str_replace('%','\%',$search).'%');
+        }
+
+        if ($gender !== '' || $level !== '') {
+            $query->whereHas('category', function ($q) use ($gender, $level) {
+                if ($gender !== '') $q->where('gender', $gender);
+                if ($level  !== '') $q->where('level',  $level);
+            });
         }
 
         $query->orderByDesc('seasons.start_date')->orderBy('leagues.name');

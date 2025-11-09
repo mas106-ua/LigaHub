@@ -12,6 +12,7 @@ import ProfileEdit from "./pages/ProfileEdit";
 import Forbidden from "./pages/Forbidden";
 import RequireRole from "./components/RequireRole";
 import RequireGuest from "./components/RequireGuest";
+import CompetitionsPage from "./pages/CompetitionsPage";
 
 export default function App() {
   return (
@@ -21,7 +22,8 @@ export default function App() {
           <Route element={<AppLayout />}>
             {/* públicas */}
             {/* Home autenticado */}
-            <Route index element={<Home />} />
+            <Route index element={<CompetitionsPage />} />
+            <Route path="ligas" element={<CompetitionsPage />} /> {/* alias opcional */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
