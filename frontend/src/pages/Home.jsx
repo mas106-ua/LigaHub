@@ -1,13 +1,14 @@
 export default function Home() {
   return (
-    <div className="bg-white rounded-3 shadow-sm p-4">
-      <h1 className="h4 mb-3" style={{ color: "var(--color-primary)" }}>
-        Home
-      </h1>
-      <p className="text-muted mb-0">
-        Aquí podrás mostrar un resumen rápido (próximos partidos, ligas, avisos...).
-        Ahora mismo no hay datos porque vendrán de la API.
-      </p>
+    <div className="container py-4">
+      <div className="p-5 mb-4 bg-light rounded-3">
+        <div className="container-fluid py-5">
+          <h1 className="display-6 fw-bold">¡¡Bienvenido!!</h1>
+          <p className="col-md-8 fs-5">
+            Explora las competiciones profesionales, semiprofesionales y amateur en España.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

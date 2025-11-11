@@ -19,7 +19,9 @@ class DatabaseSeeder extends Seeder
         RegionsSeeder::class,
         CategoriesSeeder::class,
         SeasonsSeeder::class,
+        ProvincesSeeder::class,
         OfficialCompetitionsSeeder::class,
+        BackfillLeagueProvinceSeeder::class,
         SuperAdminSeeder::class,
     ]);
     }

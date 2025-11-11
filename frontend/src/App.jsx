@@ -22,7 +22,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             {/* públicas */}
             {/* Home autenticado */}
-            <Route index element={<CompetitionsPage />} />
+            <Route index element={<Home />} />
             <Route path="ligas" element={<CompetitionsPage />} /> {/* alias opcional */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

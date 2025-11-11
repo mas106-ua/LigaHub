@@ -1,6 +1,6 @@
 // src/layouts/AppLayout.jsx
 import { useAuth } from "../context/AuthContext";
-import { Outlet, NavLink, Link, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "");
@@ -11,16 +11,12 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Cierra el dropdown al cambiar de ruta
-  useEffect(() => {
-    if (open) setOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  useEffect(() => { if (open) setOpen(false); }, [location.pathname]);
 
   const handleLogout = async () => {
-    setOpen(false);          // cierra el menú
-    await logout();          // destruye sesión y limpia estado
-    navigate("/", { replace: true }); // lleva al home
+    setOpen(false);
+    await logout();
+    navigate("/ligas", { replace: true });
   };
 
   return (
@@ -36,57 +32,54 @@ export default function AppLayout() {
           className="d-flex align-items-center justify-content-between"
           style={{ maxWidth: "1140px", margin: "0 auto", padding: "0.4rem 1rem" }}
         >
-          {/* IZQUIERDA */}
+          {/* IZQUIERDA: logo + accesos */}
           <div className="d-flex align-items-center gap-4">
-            <img
+            <Link to="/" className="d-inline-block" title="Inicio">
+              <img
                 src="/img/logo_rfef.png"
                 alt="TFG Fútbol"
-                width={30}     // ajusta a tu gusto
+                width={30}
                 height="auto"
                 style={{ display: "block" }}
-            />
+              />
+            </Link>
 
-            {!loading && user?.role === "superadmin" && (
-              <nav className="d-flex gap-3">
-                <NavLink
-                  to="/"
-                  end
-                  className={({ isActive }) =>
-                    "text-decoration-none " +
-                    (isActive
-                      ? "text-white fw-semibold border-bottom border-warning pb-1"
-                      : "text-white-50 hover:text-white")
-                  }
-                >
-                  Home
-                </NavLink>
+            {/* Accesos directos públicos */}
+            <nav className="d-flex gap-3">
+              {/* Profesionales (de momento abren /ligas con level=pro) */}
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro">
+                LALIGA
+              </Link>
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro&gender=female">
+                LIGA F
+              </Link>
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro">
+                LIGA HYPERMOTION
+              </Link>
 
-                  <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                      "text-decoration-none " +
-                      (isActive
-                        ? "text-white fw-semibold border-bottom border-warning pb-1"
-                        : "text-white-50 hover:text-white")
-                    }
-                  >
-                    Dashboard
-                  </NavLink>
-              </nav>
-            )}
+              {/* Listados prefiltrados con el nivel bloqueado */}
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=semi&lock_level=1">
+                FÚTBOL SEMIPROFESIONAL
+              </Link>
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=amateur&lock_level=1">
+                FÚTBOL AMATEUR
+              </Link>
+
+              {/* Solo admins: Dashboard (no mostramos Home para invitados) */}
+              {!loading && user?.role === "superadmin" && (
+                <Link className="text-white-50 text-decoration-none" to="/dashboard">
+                  Dashboard
+                </Link>
+              )}
+            </nav>
           </div>
 
-          {/* DERECHA */}
+          {/* DERECHA: auth */}
           <div className="position-relative">
-            {/* Si NO hay usuario => botones Login / Registro */}
             {!user ? (
               <div className="d-flex align-items-center gap-2">
-                <Link to="/login" className="btn btn-sm btn-light">
-                  Iniciar sesión
-                </Link>
-                <Link to="/register" className="btn btn-sm btn-outline-light">
-                  Registrarse
-                </Link>
+                <Link to="/login" className="btn btn-sm btn-light">Iniciar sesión</Link>
+                <Link to="/register" className="btn btn-sm btn-outline-light">Registrarse</Link>
               </div>
             ) : (
               <>
@@ -98,39 +91,22 @@ export default function AppLayout() {
                 >
                   {user?.avatar_url ? (
                     <img
-                      src={
-                        user.avatar_url.startsWith("http")
-                          ? user.avatar_url
-                          : `${API_BASE}${user.avatar_url}`
-                      }
+                      src={user.avatar_url.startsWith("http") ? user.avatar_url : `${API_BASE}${user.avatar_url}`}
                       alt={user.name}
-                      style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: "9999px",
-                        objectFit: "cover",
-                      }}
+                      style={{ width: 26, height: 26, borderRadius: "9999px", objectFit: "cover" }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: "9999px",
-                        backgroundColor: "rgba(200,16,46,.12)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 700,
-                        color: "#C8102E",
-                        fontSize: "0.75rem",
-                        textTransform: "uppercase",
+                        width: 26, height: 26, borderRadius: "9999px",
+                        backgroundColor: "rgba(200,16,46,.12)", display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        fontWeight: 700, color: "#C8102E", fontSize: "0.75rem", textTransform: "uppercase",
                       }}
                     >
                       {user?.name ? user.name[0] : "U"}
                     </div>
                   )}
-
                   <span>{user?.name || "Usuario"}</span>
                   <span style={{ fontSize: "0.7rem" }}>▾</span>
                 </button>
@@ -139,14 +115,9 @@ export default function AppLayout() {
                   <div
                     className="shadow-sm"
                     style={{
-                      position: "absolute",
-                      right: 0,
-                      top: "110%",
-                      background: "#fff",
-                      borderRadius: "0.5rem",
-                      minWidth: "160px",
-                      overflow: "hidden",
-                      zIndex: 10,
+                      position: "absolute", right: 0, top: "110%",
+                      background: "#fff", borderRadius: "0.5rem",
+                      minWidth: "160px", overflow: "hidden", zIndex: 10,
                     }}
                   >
                     <Link
@@ -157,7 +128,6 @@ export default function AppLayout() {
                     >
                       Ver perfil
                     </Link>
-
                     <button
                       onClick={handleLogout}
                       className="w-100 text-start px-3 py-2 bg-white border-0"
