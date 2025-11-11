@@ -18,4 +18,9 @@ class Region extends Model
     {
         return $this->hasMany(League::class);
     }
+
+    public function provinces()
+    {
+        return $this->hasMany(Province::class);
+    }
 }

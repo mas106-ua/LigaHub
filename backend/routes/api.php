@@ -8,6 +8,9 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\CompetitionController;
+use App\Http\Controllers\Api\GeoController;
+use App\Http\Controllers\Api\ProvinceController;
+use App\Models\Province;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -15,6 +18,7 @@ Route::get('/ping', fn() => ['pong' => now()]);
 Route::post('/auth/register', RegisterController::class);
 Route::post('/auth/login', [LoginController::class, 'store']);
 Route::get('/regions', [RegionController::class, 'index']);
+Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/competitions', [CompetitionController::class, 'index']);
 
 // Auth protegida

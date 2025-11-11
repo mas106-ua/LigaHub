@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CompetitionIndexRequest;
 use App\Http\Resources\CompetitionResource;
 use App\Models\League;
+use App\Models\Province;
 use Illuminate\Http\JsonResponse;
 
 class CompetitionController extends Controller
@@ -18,16 +19,31 @@ class CompetitionController extends Controller
         $perPage = (int) $request->query('per_page', 12);
         $gender  = (string) $request->query('gender', ''); 
         $level   = (string) $request->query('level', '');  
+        $province = (string) $request->query('province', '');
 
         $query = League::query()
             ->select('leagues.*')
-            ->with(['region:id,name,code', 'season:id,code,start_date', 'category:id,name,level,gender'])
+            ->with(['region:id,name,code', 'season:id,code,start_date', 'category:id,name,level,gender', 'province:id,name,code,region_id',])
             ->leftJoin('seasons', 'seasons.id', '=', 'leagues.season_id')
             ->official()
             ->public();
 
         if ($region !== '') {
             $query->whereHas('region', fn ($q) => $q->where('code', $region));
+        }
+
+        if ($province !== '') {
+            $prov = Province::where('code', $province)->first();
+
+            if ($prov) {
+                $query->where(function ($q) use ($prov) {
+                    $q->where('leagues.province_id', $prov->id)
+                    ->orWhere(function ($q2) use ($prov) {
+                        $q2->whereNull('leagues.province_id')
+                            ->where('leagues.region_id', $prov->region_id);
+                    });
+                });
+            }
         }
 
         if ($season !== '') {

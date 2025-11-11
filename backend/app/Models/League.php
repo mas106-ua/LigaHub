@@ -24,6 +24,8 @@ class League extends Model
     public function region(){ return $this->belongsTo(Region::class); }
     public function season(){ return $this->belongsTo(Season::class); }
     public function category(){ return $this->belongsTo(Category::class); }
+    public function province(){ return $this->belongsTo(Province::class); }
+
 
     // Scopes útiles
     public function scopeOfficial($q){ return $q->where('type', 'official'); }
