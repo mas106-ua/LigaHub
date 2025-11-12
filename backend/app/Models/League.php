@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\MatchModel;
 
 class League extends Model
 {
@@ -19,6 +20,9 @@ class League extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function matches(){ return $this->hasMany(MatchModel::class); }
+
 
     // Relaciones
     public function region(){ return $this->belongsTo(Region::class); }

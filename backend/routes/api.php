@@ -10,7 +10,8 @@ use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\CompetitionController;
 use App\Http\Controllers\Api\GeoController;
 use App\Http\Controllers\Api\ProvinceController;
-use App\Models\Province;
+use App\Http\Controllers\Api\PublicMatchdayController;
+use App\Http\Controllers\Api\PublicMatchController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -20,6 +21,12 @@ Route::post('/auth/login', [LoginController::class, 'store']);
 Route::get('/regions', [RegionController::class, 'index']);
 Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/competitions', [CompetitionController::class, 'index']);
+
+// Listar jornadas de una liga (opcional: ?group=ID|code)
+Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
+
+// Listar partidos de una jornada
+Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {
