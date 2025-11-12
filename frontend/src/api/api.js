@@ -17,4 +17,13 @@ api.interceptors.response.use(
   }
 );
 
+export function toApiError(err) {
+  if (err?.response) {
+    const msg = err.response?.data?.message || err.response?.statusText || "Error de API";
+    return new Error(`${msg} (HTTP ${err.response.status})`);
+  }
+  if (err?.request) return new Error("Error de red o servidor no responde");
+  return new Error("Error desconocido");
+}
+
 export default api;

@@ -1,7 +1,7 @@
 <?php
 return [
   'league_name' => 'Primera Federación – Grupo 2',
-  'season_code' => '2025/26',
+  'season_code' => '2024/25',
   'group_name'  => '2',
   'teams' => [
     'AD Alcorcón',

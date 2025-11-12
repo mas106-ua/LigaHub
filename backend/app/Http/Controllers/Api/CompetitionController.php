@@ -8,6 +8,7 @@ use App\Http\Resources\CompetitionResource;
 use App\Models\League;
 use App\Models\Province;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB; 
 
 class CompetitionController extends Controller
 {
@@ -73,5 +74,82 @@ class CompetitionController extends Controller
                 'total'    => $paginator->total(),
             ],
         ]);
+    }
+
+    // === NUEVO: resumen de liga para cabecera FE
+    public function show(League $league): JsonResponse
+    {
+        // Carga relaciones básicas para la cabecera
+        $league->load([
+            'region:id,name,code',
+            'season:id,code,start_date',
+            'category:id,name,level,gender',
+            'province:id,name,code,region_id',
+        ]);
+
+        $md = DB::table('matches')
+            ->where('league_id', $league->id)
+            ->selectRaw('MIN(matchday_number) AS min_md, MAX(matchday_number) AS max_md')
+            ->selectRaw('MIN(scheduled_at) AS first_date, MAX(scheduled_at) AS last_date')
+            ->first();
+
+        $groups = DB::table('league_teams')
+            ->where('league_id', $league->id)
+            ->whereNotNull('group_name')
+            ->distinct()
+            ->orderBy('group_name')
+            ->pluck('group_name');
+
+        return response()->json([
+            'data' => [
+                // puedes devolver la liga envuelta en tu CompetitionResource si prefieres:
+                // 'league' => (new CompetitionResource($league))->resolve(),
+                'id'          => $league->id,
+                'name'        => $league->name,
+                'season'      => $league->season?->code,
+                'category'    => [
+                    'name'   => $league->category?->name,
+                    'level'  => $league->category?->level,
+                    'gender' => $league->category?->gender,
+                ],
+                'region'      => $league->region?->code,
+                'province'    => $league->province?->code,
+                'min_matchday'=> (int)($md->min_md ?? 1),
+                'max_matchday'=> (int)($md->max_md ?? 0),
+                'date_range'  => ['from' => $md->first_date, 'to' => $md->last_date],
+                'groups'      => $groups,
+            ]
+        ]);
+    }
+
+    // === NUEVO: lista de grupos de una liga (para el selector FE)
+    public function groups(League $league): JsonResponse
+    {
+        $groups = DB::table('league_teams')
+            ->where('league_id', $league->id)
+            ->whereNotNull('group_name')
+            ->distinct()
+            ->orderBy('group_name')
+            ->pluck('group_name');
+
+        return response()
+            ->json(['data' => $groups])
+            // cache baratito (2 minutos) porque cambia poco:
+            ->header('Cache-Control', 'public, max-age=120');
+    }
+
+    public function siblings(League $league): JsonResponse
+    {
+        // Base: "Primera Federación" recortando " – Grupo X" al final
+        $base = preg_replace('/\s*–\s*Grupo\s+\d+$/u', '', $league->name);
+
+        $siblings = DB::table('leagues')
+            ->where('season_id', $league->season_id)
+            ->where('category_id', $league->category_id)
+            ->where('name', 'like', $base.'%')
+            ->orderBy('name')
+            ->get(['id','name']);
+
+        return response()->json(['data' => $siblings]);
     }
 }
