@@ -8,7 +8,6 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\CompetitionController;
-use App\Http\Controllers\Api\GeoController;
 use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\Api\PublicMatchdayController;
 use App\Http\Controllers\Api\PublicMatchController;
@@ -27,6 +26,10 @@ Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'ind
 
 // Listar partidos de una jornada
 Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
+
+Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
+Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
+Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {

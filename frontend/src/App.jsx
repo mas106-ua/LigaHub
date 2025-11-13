@@ -11,8 +11,8 @@ import ProfileView from "./pages/ProfileView";
 import ProfileEdit from "./pages/ProfileEdit";
 import Forbidden from "./pages/Forbidden";
 import RequireRole from "./components/RequireRole";
-import RequireGuest from "./components/RequireGuest";
 import CompetitionsPage from "./pages/CompetitionsPage";
+import MatchdaysPage from "./pages/MatchdaysPage";
 
 export default function App() {
   return (
@@ -24,6 +24,7 @@ export default function App() {
             {/* Home autenticado */}
             <Route index element={<Home />} />
             <Route path="ligas" element={<CompetitionsPage />} /> {/* alias opcional */}
+            <Route path="/comp/:leagueId/jornadas" element={<MatchdaysPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
