@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\CompetitionController;
 use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\Api\PublicMatchdayController;
 use App\Http\Controllers\Api\PublicMatchController;
+use App\Http\Controllers\Api\PublicMatchDetailController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -30,6 +31,7 @@ Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchControlle
 Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
 Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
 Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
+Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {
