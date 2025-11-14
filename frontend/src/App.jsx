@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -13,6 +13,11 @@ import Forbidden from "./pages/Forbidden";
 import RequireRole from "./components/RequireRole";
 import CompetitionsPage from "./pages/CompetitionsPage";
 import MatchdaysPage from "./pages/MatchdaysPage";
+import MatchDetailLayout from "./pages/match/MatchDetailLayout";
+import OverviewTab from "./pages/tabs/OverviewTab";
+import EventsTab from "./pages/tabs/EventsTab";
+import LineupsTab from "./pages/tabs/LineupsTab";
+import StatsTab from "./pages/tabs/StatsTab";
 
 export default function App() {
   return (
@@ -25,6 +30,12 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="ligas" element={<CompetitionsPage />} /> {/* alias opcional */}
             <Route path="/comp/:leagueId/jornadas" element={<MatchdaysPage />} />
+            <Route path="/partido/:id" element={<MatchDetailLayout />}>
+              <Route index element={<Navigate to="eventos" replace />} />
+              <Route path="eventos" element={<EventsTab />} />
+              <Route path="alineaciones" element={<LineupsTab />} />
+              <Route path="estadisticas" element={<StatsTab />} />
+            </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
