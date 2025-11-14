@@ -81,3 +81,12 @@ export async function fetchLeagueSummary(leagueId) {
     throw toApiError(e);
   }
 }
+
+export async function getMatchDetail(matchId) {
+  try {
+    const { data } = await api.get(`/api/matches/${matchId}`);
+    return data.data; // { id, league_id, matchday, scheduled_at, status, score, home_team, away_team, venue, events, team_stats?, lineups? }
+  } catch (err) {
+    throw toApiError(err);
+  }
+}
