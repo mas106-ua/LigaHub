@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         OfficialCompetitionsSeeder::class,
         BackfillLeagueProvinceSeeder::class,
         SuperAdminSeeder::class,
+        AdminUsersSeeder::class,
     ]);
     }
 }

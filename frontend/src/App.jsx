@@ -18,6 +18,8 @@ import OverviewTab from "./pages/tabs/OverviewTab";
 import EventsTab from "./pages/tabs/EventsTab";
 import LineupsTab from "./pages/tabs/LineupsTab";
 import StatsTab from "./pages/tabs/StatsTab";
+import AdminMatchdayResultsPage from "./pages/admin/AdminMatchdayResultsPage";
+
 
 export default function App() {
   return (
@@ -41,14 +43,23 @@ export default function App() {
             <Route path="/forbidden" element={<Forbidden />} />
 
             {/* privadas */}
-            <Route
-            >
+            <Route element={<RequireAuth />}>
               {/* admin-only */}
               <Route
                 path="dashboard"
                 element={
                   <RequireRole roles="superadmin">
                     <Dashboard />
+                  </RequireRole>
+                }
+              />
+
+              {/* edición de resultados de una jornada */}
+              <Route
+                path="admin/ligas/:leagueId/jornadas/:matchdayNumber/resultados"
+                element={
+                  <RequireRole roles={["admin", "superadmin"]}>
+                    <AdminMatchdayResultsPage />
                   </RequireRole>
                 }
               />
