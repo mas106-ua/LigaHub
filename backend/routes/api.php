@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\Api\PublicMatchdayController;
 use App\Http\Controllers\Api\PublicMatchController;
 use App\Http\Controllers\Api\PublicMatchDetailController;
+use App\Http\Controllers\Api\AdminMatchResultController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -52,4 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+
+    Route::put(
+        '/admin/leagues/{league}/matchdays/{number}/results',
+        [AdminMatchResultController::class, 'bulkUpdate']
+    );
 });

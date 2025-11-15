@@ -34,4 +34,16 @@ class League extends Model
     // Scopes útiles
     public function scopeOfficial($q){ return $q->where('type', 'official'); }
     public function scopePublic($q){ return $q->where('visibility', 'public'); }
+
+    public function memberships()
+    {
+        return $this->hasMany(LeagueMembership::class);
+    }
+
+    public function admins()
+    {
+        return $this->belongsToMany(User::class, 'league_memberships')
+            ->withPivot('role_in_league', 'joined_at')
+            ->wherePivotIn('role_in_league', ['owner', 'admin']);
+    }
 }
