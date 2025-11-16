@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PublicMatchdayController;
 use App\Http\Controllers\Api\PublicMatchController;
 use App\Http\Controllers\Api\PublicMatchDetailController;
 use App\Http\Controllers\Api\AdminMatchResultController;
+use App\Http\Controllers\Api\AdminMatchLineupController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -58,4 +59,6 @@ Route::middleware('auth:sanctum')->group(function () {
         '/admin/leagues/{league}/matchdays/{number}/results',
         [AdminMatchResultController::class, 'bulkUpdate']
     );
+    // Alineaciones de partido (admin)
+    Route::put('/admin/matches/{match}/lineups', [AdminMatchLineupController::class, 'update']);
 });
