@@ -20,4 +20,9 @@ class Team extends Model
     ];
 
     public function leagues(){ return $this->belongsToMany(League::class, 'league_teams')->withPivot('group_name'); }
+    public function players()
+    {
+        return $this->belongsToMany(Player::class, 'team_players')
+            ->withPivot(['shirt_number', 'from_date', 'to_date']);
+    }
 }

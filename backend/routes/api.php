@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PublicMatchController;
 use App\Http\Controllers\Api\PublicMatchDetailController;
 use App\Http\Controllers\Api\AdminMatchResultController;
 use App\Http\Controllers\Api\AdminMatchLineupController;
+use App\Http\Controllers\Api\TeamPlayersController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -23,6 +24,7 @@ Route::post('/auth/login', [LoginController::class, 'store']);
 Route::get('/regions', [RegionController::class, 'index']);
 Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/competitions', [CompetitionController::class, 'index']);
+Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
 
 // Listar jornadas de una liga (opcional: ?group=ID|code)
 Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);

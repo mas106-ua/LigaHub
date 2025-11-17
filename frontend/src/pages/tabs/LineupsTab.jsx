@@ -1,5 +1,8 @@
 import { useOutletContext } from "react-router-dom";
 import FootballPitch from "../../components/Matchs/FootballPitch";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+
 
 /* =============== helpers comunes =============== */
 const spreadXs = (n) => {
@@ -160,13 +163,13 @@ function BenchTablePro({ home, away }) {
 /* =============== vista principal =============== */
 export default function LineupsTab() {
   const { match } = useOutletContext();
-  const lineups = Array.isArray(match?.lineups) ? match.lineups : [];
-  const home = lineups.find(l => l.side === "home") || {};
-  const away = lineups.find(l => l.side === "away") || {};
+  const { user, isAuth } = useAuth();
+  const isAdmin =
+    isAuth && (user?.role === "admin" || user?.role === "superadmin");
 
-  if (!home.starters?.length && !away.starters?.length) {
-    return <div className="text-muted">No hay alineaciones disponibles.</div>;
-  }
+  const lineups = Array.isArray(match?.lineups) ? match.lineups : [];
+  const home = lineups.find((l) => l.side === "home") || {};
+  const away = lineups.find((l) => l.side === "away") || {};
 
   const homeTeamName =
     match?.home_team?.short_name || match?.home_team?.name || "Local";
@@ -178,34 +181,58 @@ export default function LineupsTab() {
   const awayCoach =
     away.coach_name || away.coach || match?.away_coach || "";
 
+  const noLineups =
+    !home.starters?.length && !away.starters?.length;
+
   return (
-    <div className="row g-3">
-      {/* Campo + jugadores */}
-      <div className="col-12 col-xl-7">
-        <div className="card h-100">
-          <div className="card-body card-body--pitch">
-            <PitchWithPlayers
-              homeStarters={home.starters || []}
-              awayStarters={away.starters || []}
-              homeTeamName={homeTeamName}
-              awayTeamName={awayTeamName}
-              homeCoach={homeCoach}
-              awayCoach={awayCoach}
-            />
+    <div className="lineups-tab">
+      {/* Cabecera de la pestaña */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2 className="h6 mb-0"></h2>
+
+        {isAdmin && (
+          <Link
+            to={`/admin/partidos/${match.id}/alineaciones`}
+            className="btn btn-outline-secondary btn-sm"
+          >
+            Editar alineaciones
+          </Link>
+        )}
+      </div>
+
+      {noLineups && (
+        <div className="text-muted">No hay alineaciones disponibles.</div>
+      )}
+
+      {(home.starters?.length || away.starters?.length) && (
+        <div className="row g-3">
+          {/* Campo + jugadores */}
+          <div className="col-12 col-xl-7">
+            <div className="card h-100">
+              <div className="card-body card-body--pitch">
+                <PitchWithPlayers
+                  homeStarters={home.starters || []}
+                  awayStarters={away.starters || []}
+                  homeTeamName={homeTeamName}
+                  awayTeamName={awayTeamName}
+                  homeCoach={homeCoach}
+                  awayCoach={awayCoach}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Banquillo */}
+          <div className="col-12 col-xl-5">
+            <div className="card bench-card">
+              <BenchTablePro
+                home={{ bench: home.bench || [] }}
+                away={{ bench: away.bench || [] }}
+              />
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Banquillo ocupa todo el card */}
-      <div className="col-12 col-xl-5">
-        <div className="card bench-card">
-          <BenchTablePro
-            home={{ bench: home.bench || [] }}
-            away={{ bench: away.bench || [] }}
-          />
-        </div>
-      </div>
-
+      )}
     </div>
   );
 }
