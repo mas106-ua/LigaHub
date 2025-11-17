@@ -36,4 +36,11 @@ class MatchModel extends Model
     public function awayTeam(): BelongsTo { return $this->belongsTo(Team::class, 'away_team_id'); }
     public function venue(): BelongsTo { return $this->belongsTo(Venue::class); }
     public function lineups(): HasMany { return $this->hasMany(MatchLineup::class, 'match_id'); }
+    public function events(): HasMany
+    {
+        return $this->hasMany(MatchEvent::class, 'match_id')
+            ->orderBy('minute')
+            ->orderBy('extra_minute')
+            ->orderBy('id');
+    }
 }

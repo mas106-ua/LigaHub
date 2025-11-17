@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\PublicMatchDetailController;
 use App\Http\Controllers\Api\AdminMatchResultController;
 use App\Http\Controllers\Api\AdminMatchLineupController;
 use App\Http\Controllers\Api\TeamPlayersController;
+use App\Http\Controllers\Api\MatchEventsAdminController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -63,4 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
     );
     // Alineaciones de partido (admin)
     Route::put('/admin/matches/{match}/lineups', [AdminMatchLineupController::class, 'update']);
+
+    Route::put(
+        '/admin/matches/{match}/events',
+        [MatchEventsAdminController::class, 'sync']
+    );
 });

@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use App\Models\League;
 use App\Models\CompetitionAdminScope;
+use App\Models\MatchModel;
 
 class User extends Authenticatable
 {
@@ -117,6 +118,26 @@ class User extends Authenticatable
                 }
             })
             ->exists();
+    }
+
+    public function canManageMatch(MatchModel $match): bool
+    {
+        // 1) Superadmin global
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // 2) Reutilizamos canManageLeague sobre la liga del partido
+        //    Si la relación ya viene cargada, usamos esa; si no, la pedimos.
+        $league = $match->relationLoaded('league')
+            ? $match->league
+            : $match->league()->first();
+
+        if (!$league) {
+            return false;
+        }
+
+        return $this->canManageLeague($league);
     }
 
 }
