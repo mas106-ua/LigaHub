@@ -39,3 +39,29 @@ export async function updateMatchdayResults(leagueId, matchdayNumber, matches) {
     throw toApiError(err);
   }
 }
+
+/**
+ * Guarda/actualiza las alineaciones de un partido (admin).
+ *
+ * @param {number|string} matchId
+ * @param {{home?: object, away?: object}} payload
+ */
+export async function updateMatchLineups(matchId, payload) {
+  try {
+    await getCsrf();
+    const token = getCookie("XSRF-TOKEN");
+
+    const { data } = await api.put(
+      `/api/admin/matches/${matchId}/lineups`,
+      payload,
+      {
+        headers: { "X-XSRF-TOKEN": token },
+        withCredentials: true,
+      }
+    );
+
+    return data; // { message: 'Alineaciones guardadas correctamente.' }
+  } catch (err) {
+    throw toApiError(err);
+  }
+}

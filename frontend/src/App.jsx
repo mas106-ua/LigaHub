@@ -19,6 +19,7 @@ import EventsTab from "./pages/tabs/EventsTab";
 import LineupsTab from "./pages/tabs/LineupsTab";
 import StatsTab from "./pages/tabs/StatsTab";
 import AdminMatchdayResultsPage from "./pages/admin/AdminMatchdayResultsPage";
+import AdminMatchLineupsPage from "./pages/admin/AdminMatchLineupsPage";
 
 
 export default function App() {
@@ -60,6 +61,14 @@ export default function App() {
                 element={
                   <RequireRole roles={["admin", "superadmin"]}>
                     <AdminMatchdayResultsPage />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="admin/partidos/:matchId/alineaciones"
+                element={
+                  <RequireRole roles={["admin", "superadmin"]}>
+                    <AdminMatchLineupsPage />
                   </RequireRole>
                 }
               />
