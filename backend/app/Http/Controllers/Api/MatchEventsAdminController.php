@@ -21,6 +21,12 @@ class MatchEventsAdminController extends Controller
             ], 403);
         }
 
+        if ($match->edit_status === 'verified' && $user->role !== 'superadmin') {
+            return response()->json([
+                'message' => 'El partido está verificado y no se pueden editar los eventos.',
+            ], 403);
+        }
+
         $data = $request->validate([
             'events'                     => ['required', 'array'],
             'events.*.id'                => ['nullable', 'integer', 'exists:match_events,id'],

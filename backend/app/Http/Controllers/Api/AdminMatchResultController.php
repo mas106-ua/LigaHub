@@ -50,6 +50,16 @@ class AdminMatchResultController extends Controller
             ], 422);
         }
 
+        if ($user->role !== 'superadmin') {
+            foreach ($matches as $match) {
+                if ($match->edit_status === 'verified') {
+                    return response()->json([
+                        'message' => "El partido {$match->id} está verificado y no se puede editar.",
+                    ], 403);
+                }
+            }
+        }
+
         // 3) Validaciones de coherencia extra (goles/estado)
         $errors = [];
 
