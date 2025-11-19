@@ -7,32 +7,32 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MatchEvent extends Model
 {
+    protected $table = 'match_events';
+
     protected $fillable = [
         'match_id',
-        'side',
         'minute',
-        'extra_minute',
         'type',
         'player_id',
         'related_player_id',
-        'description',
-        'created_by',
-        'updated_by',
+        'team_id',
+        'detail',
     ];
 
     protected $casts = [
-        'minute'        => 'integer',
-        'extra_minute'  => 'integer',
+        'minute' => 'integer',
     ];
+
+    public $timestamps = false;
 
     public function match(): BelongsTo
     {
-        return $this->belongsTo(MatchModel::class);
+        return $this->belongsTo(MatchModel::class, 'match_id');
     }
 
     public function player(): BelongsTo
     {
-        return $this->belongsTo(Player::class);
+        return $this->belongsTo(Player::class, 'player_id');
     }
 
     public function relatedPlayer(): BelongsTo
@@ -40,13 +40,8 @@ class MatchEvent extends Model
         return $this->belongsTo(Player::class, 'related_player_id');
     }
 
-    public function creator(): BelongsTo
+    public function team(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(Team::class, 'team_id');
     }
 }

@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
         BackfillLeagueProvinceSeeder::class,
         SuperAdminSeeder::class,
         AdminUsersSeeder::class,
+        TeamsAndFixturesSeeder::class,
+        TestLineupsPlayersSeeder::class,
     ]);
     }
 }
