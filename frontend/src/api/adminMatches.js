@@ -65,3 +65,44 @@ export async function updateMatchLineups(matchId, payload) {
     throw toApiError(err);
   }
 }
+
+// ...
+
+/**
+ * Sincroniza los eventos de un partido (admin).
+ * Enviamos side, minute, type, player_id, related_player_id, detail.
+ */
+export async function updateMatchEvents(matchId, events) {
+  try {
+    await getCsrf();
+    const token = getCookie("XSRF-TOKEN");
+
+    const payload = {
+      events: events.map((ev) => ({
+        id: ev.id ?? null,
+        side: ev.side,
+        minute:
+          ev.minute === "" || ev.minute === null
+            ? 0
+            : Number(ev.minute),
+        type: ev.type,
+        player_id: ev.player_id || null,
+        related_player_id: ev.related_player_id || null,
+        detail: ev.detail || null,
+      })),
+    };
+
+    const { data } = await api.put(
+      `/api/admin/matches/${matchId}/events`,
+      payload,
+      {
+        headers: { "X-XSRF-TOKEN": token },
+        withCredentials: true,
+      }
+    );
+
+    return data;
+  } catch (err) {
+    throw toApiError(err);
+  }
+}

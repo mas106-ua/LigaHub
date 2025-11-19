@@ -40,7 +40,6 @@ class MatchModel extends Model
     {
         return $this->hasMany(MatchEvent::class, 'match_id')
             ->orderBy('minute')
-            ->orderBy('extra_minute')
             ->orderBy('id');
     }
 }

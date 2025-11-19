@@ -26,48 +26,29 @@ class MatchEventsAdminController extends Controller
             'events.*.id'                => ['nullable', 'integer', 'exists:match_events,id'],
             'events.*.side'              => ['required', Rule::in(['home', 'away'])],
             'events.*.minute'            => ['required', 'integer', 'min:0', 'max:130'],
-            'events.*.extra_minute'      => ['nullable', 'integer', 'min:0', 'max:15'],
-            'events.*.type'              => ['required', 'string', 'max:32'],
+            'events.*.type'              => [
+                'required',
+                Rule::in(['goal', 'own_goal', 'yellow', 'red', 'sub_in']),
+            ],
             'events.*.player_id'         => ['nullable', 'integer', 'exists:players,id'],
             'events.*.related_player_id' => ['nullable', 'integer', 'exists:players,id'],
-            'events.*.description'       => ['nullable', 'string'],
+            'events.*.detail'            => ['nullable', 'string', 'max:255'],
         ]);
 
         $eventsInput = $data['events'];
 
-        $allowedTypes = [
-            'goal',
-            'own_goal',
-            'penalty_goal',
-            'penalty_miss',
-            'assist',
-            'yellow_card',
-            'red_card',
-            'second_yellow',
-            'substitution',
-            'var',
-            'note',
-        ];
+        $match->loadMissing(['homeTeam', 'awayTeam']);
+        $homeTeamId = $match->home_team_id;
+        $awayTeamId = $match->away_team_id;
 
-        // Validaciones de tipo, jugadores, cambios coherentes, etc.
+        // ===== VALIDACIONES EXTRA con team_players =====
         foreach ($eventsInput as $idx => $ev) {
-            if (!in_array($ev['type'], $allowedTypes, true)) {
-                return response()->json([
-                    'message' => "Tipo de evento no permitido en index {$idx}: {$ev['type']}",
-                ], 422);
-            }
+            $side = $ev['side'];
+            $teamId = $side === 'home' ? $homeTeamId : $awayTeamId;
 
-            $needsPlayer = in_array($ev['type'], [
-                'goal',
-                'own_goal',
-                'penalty_goal',
-                'penalty_miss',
-                'assist',
-                'yellow_card',
-                'red_card',
-                'second_yellow',
-                'substitution',
-            ], true);
+            $type = $ev['type'];
+
+            $needsPlayer = in_array($type, ['goal', 'own_goal', 'yellow', 'red', 'sub_in'], true);
 
             if ($needsPlayer && empty($ev['player_id'])) {
                 return response()->json([
@@ -75,93 +56,81 @@ class MatchEventsAdminController extends Controller
                 ], 422);
             }
 
-            if ($ev['type'] === 'substitution') {
-                if (empty($ev['related_player_id'])) {
+            // Para cambios: necesitamos los dos jugadores y que sean distintos
+            if ($type === 'sub_in') {
+                if (empty($ev['player_id']) || empty($ev['related_player_id'])) {
                     return response()->json([
-                        'message' => "El evento #{$idx} (cambio) requiere related_player_id.",
+                        'message' => "El evento #{$idx} (cambio) requiere jugador que entra y que sale.",
                     ], 422);
                 }
-                if (!empty($ev['player_id']) && $ev['player_id'] === $ev['related_player_id']) {
+                if ($ev['player_id'] === $ev['related_player_id']) {
                     return response()->json([
                         'message' => "El evento #{$idx} (cambio) no puede tener el mismo jugador entrando y saliendo.",
                     ], 422);
                 }
             }
 
-            if (in_array($ev['type'], ['var', 'note'], true) && empty($ev['description'])) {
-                return response()->json([
-                    'message' => "El evento #{$idx} ({$ev['type']}) requiere una descripción.",
-                ], 422);
+            // Validar pertenencia al equipo mediante team_players
+            if (!empty($ev['player_id'])) {
+                $belongs = DB::table('team_players')
+                    ->where('player_id', $ev['player_id'])
+                    ->where('team_id', $teamId)
+                    ->exists();
+
+                if (!$belongs) {
+                    return response()->json([
+                        'message' => "El jugador {$ev['player_id']} no pertenece al equipo del evento (#{$idx}).",
+                    ], 422);
+                }
+            }
+
+            if (!empty($ev['related_player_id'])) {
+                $belongs = DB::table('team_players')
+                    ->where('player_id', $ev['related_player_id'])
+                    ->where('team_id', $teamId)
+                    ->exists();
+
+                if (!$belongs) {
+                    return response()->json([
+                        'message' => "El jugador relacionado {$ev['related_player_id']} no pertenece al equipo del evento (#{$idx}).",
+                    ], 422);
+                }
             }
         }
 
-        // Preparamos ids de equipos para validar side/jugadores
-        $match->loadMissing(['homeTeam', 'awayTeam']);
-        $homeTeamId = $match->home_team_id;
-        $awayTeamId = $match->away_team_id;
-
-        DB::transaction(function () use ($match, $eventsInput, $user, $homeTeamId, $awayTeamId) {
+        // ===== PERSISTENCIA =====
+        DB::transaction(function () use ($match, $eventsInput, $homeTeamId, $awayTeamId) {
             $existing = $match->events()->get()->keyBy('id');
             $keepIds  = [];
 
             foreach ($eventsInput as $raw) {
                 $id = $raw['id'] ?? null;
 
+                $teamId = $raw['side'] === 'home' ? $homeTeamId : $awayTeamId;
+
                 $payload = [
-                    'side'              => $raw['side'],
                     'minute'            => $raw['minute'],
-                    'extra_minute'      => $raw['extra_minute'] ?? 0,
                     'type'              => $raw['type'],
                     'player_id'         => $raw['player_id'] ?? null,
                     'related_player_id' => $raw['related_player_id'] ?? null,
-                    'description'       => $raw['description'] ?? null,
+                    'team_id'           => $teamId,
+                    'detail'            => $raw['detail'] ?? null,
                 ];
-
-                // Validación simple de que el jugador pertenece al equipo correcto según side
-                if (!empty($payload['player_id'])) {
-                    $playerTeamId = DB::table('players')
-                        ->where('id', $payload['player_id'])
-                        ->value('team_id');
-
-                    if ($payload['side'] === 'home' && $playerTeamId !== $homeTeamId) {
-                        throw new \RuntimeException("Jugador {$payload['player_id']} no pertenece al equipo local.");
-                    }
-                    if ($payload['side'] === 'away' && $playerTeamId !== $awayTeamId) {
-                        throw new \RuntimeException("Jugador {$payload['player_id']} no pertenece al equipo visitante.");
-                    }
-                }
-
-                if (!empty($payload['related_player_id'])) {
-                    $relTeamId = DB::table('players')
-                        ->where('id', $payload['related_player_id'])
-                        ->value('team_id');
-
-                    if ($payload['side'] === 'home' && $relTeamId !== $homeTeamId) {
-                        throw new \RuntimeException("Jugador relacionado {$payload['related_player_id']} no pertenece al equipo local.");
-                    }
-                    if ($payload['side'] === 'away' && $relTeamId !== $awayTeamId) {
-                        throw new \RuntimeException("Jugador relacionado {$payload['related_player_id']} no pertenece al equipo visitante.");
-                    }
-                }
 
                 if ($id && $existing->has($id)) {
                     /** @var MatchEvent $ev */
                     $ev = $existing->get($id);
                     $ev->fill($payload);
-                    $ev->updated_by = $user->id;
                     $ev->save();
                     $keepIds[] = $ev->id;
                 } else {
                     $ev = new MatchEvent($payload);
-                    $ev->match_id  = $match->id;
-                    $ev->created_by = $user->id;
-                    $ev->updated_by = $user->id;
+                    $ev->match_id = $match->id;
                     $ev->save();
                     $keepIds[] = $ev->id;
                 }
             }
 
-            // Borrar los que ya no vengan
             if (!empty($keepIds)) {
                 $match->events()
                     ->whereNotIn('id', $keepIds)
@@ -171,7 +140,7 @@ class MatchEventsAdminController extends Controller
             }
         });
 
-        $match->load(['events.player', 'events.relatedPlayer']);
+        $match->load(['events.player', 'events.relatedPlayer', 'events.team']);
 
         return response()->json([
             'message' => 'Eventos sincronizados correctamente.',
