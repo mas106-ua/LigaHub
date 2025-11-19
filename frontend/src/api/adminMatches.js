@@ -106,3 +106,63 @@ export async function updateMatchEvents(matchId, events) {
     throw toApiError(err);
   }
 }
+
+export async function openMatch(matchId) {
+  try {
+    await getCsrf();
+    const token = getCookie("XSRF-TOKEN");
+
+    const { data } = await api.post(
+      `/api/admin/matches/${matchId}/open`,
+      {},
+      {
+        headers: { "X-XSRF-TOKEN": token },
+        withCredentials: true,
+      }
+    );
+
+    return data; // { message: 'Partido reabierto...' }
+  } catch (err) {
+    throw toApiError(err);
+  }
+}
+
+export async function closeMatch(matchId) {
+  try {
+    await getCsrf();
+    const token = getCookie("XSRF-TOKEN");
+
+    const { data } = await api.post(
+      `/api/admin/matches/${matchId}/close`,
+      {},
+      {
+        headers: { "X-XSRF-TOKEN": token },
+        withCredentials: true,
+      }
+    );
+
+    return data; // { message: 'Partido cerrado...' }
+  } catch (err) {
+    throw toApiError(err);
+  }
+}
+
+export async function verifyMatch(matchId) {
+  try {
+    await getCsrf();
+    const token = getCookie("XSRF-TOKEN");
+
+    const { data } = await api.post(
+      `/api/admin/matches/${matchId}/verify`,
+      {},
+      {
+        headers: { "X-XSRF-TOKEN": token },
+        withCredentials: true,
+      }
+    );
+
+    return data; // { message: 'Partido verificado...' }
+  } catch (err) {
+    throw toApiError(err);
+  }
+}

@@ -197,6 +197,10 @@ class PublicMatchDetailController extends Controller
                 'events' => $events,     // contiene minute,type,team_name,player_name,detail,side…
                 'team_stats' => $teamStats, // si existe la tabla
                 'lineups'    => $lineups,
+                'status'      => $match->status,
+                'edit_status' => $match->edit_status,
+                'verified_at' => $match->verified_at,
+                'verified_by' => $match->verified_by,
             ],
         ]);
 
