@@ -48,15 +48,28 @@ class MatchDetailResource extends JsonResource
             ],
             'venue' => $m->venue_id ? ['id' => $m->venue_id] : null,
             'notes' => $m->notes,
-            'events' => collect($this->events)->map(function($e){
+            'events' => collect($this->events)->map(function ($e) {
                 return [
-                    'id'          => $e->id,
-                    'minute'      => $e->minute,
-                    'type'        => $e->type,       // goal, yellow, red, sub, penalty, etc.
-                    'side'        => $e->side,       // 'home' / 'away' si lo usas
-                    'description' => $e->description,
-                    'team'        => ['id' => $e->team_id,   'name' => $e->team_name],
-                    'player'      => $e->player_id ? ['id' => $e->player_id, 'name' => $e->player_name] : null,
+                    'id'     => $e->id,
+                    'minute' => $e->minute,
+                    'type'   => $e->type,   // goal, yellow, red, sub_in, etc.
+                    'side'   => $e->side,   // 'home' / 'away'
+
+                    // Usaremos "detail" en el frontend
+                    'detail' => $e->description,
+
+                    'team'   => [
+                        'id'   => $e->team_id,
+                        'name' => $e->team_name,
+                    ],
+
+                    'player' => $e->player_id
+                        ? ['id' => $e->player_id, 'name' => $e->player_name]
+                        : null,
+
+                    'related_player' => $e->related_player_id
+                        ? ['id' => $e->related_player_id, 'name' => $e->related_player_name]
+                        : null,
                 ];
             })->values(),
         ];

@@ -23,12 +23,13 @@ class PublicMatchDetailController extends Controller
             ])
             ->findOrFail($id);
 
-        // 2) Eventos (adaptado a tu tabla: 'detail' y players.full_name)
+                // 2) Eventos (adaptado a tu tabla: 'detail' y players.full_name)
         $events = [];
         if (Schema::hasTable('match_events')) {
             $events = DB::table('match_events as e')
                 ->leftJoin('teams as t', 't.id', '=', 'e.team_id')
                 ->leftJoin('players as p', 'p.id', '=', 'e.player_id')
+                ->leftJoin('players as rp', 'rp.id', '=', 'e.related_player_id')
                 ->where('e.match_id', $match->id)
                 ->orderBy('e.minute')
                 ->orderBy('e.id')
@@ -41,15 +42,42 @@ class PublicMatchDetailController extends Controller
                     DB::raw('t.name as team_name'),
                     'e.player_id',
                     DB::raw('p.full_name as player_name'),
-                    // tu columna se llama 'detail', no 'description'
+                    'e.related_player_id',
+                    DB::raw('rp.full_name as related_player_name'),
                     'e.detail',
                 ])
-                // Calculamos 'side' en PHP según team_id
                 ->map(function ($row) use ($match) {
-                    $row->side = $row->team_id === $match->home_team_id
-                        ? 'home'
-                        : ($row->team_id === $match->away_team_id ? 'away' : null);
-                    return $row;
+                    // Calculamos 'side' según team_id
+                    $side = null;
+                    if ($row->team_id === $match->home_team_id) {
+                        $side = 'home';
+                    } elseif ($row->team_id === $match->away_team_id) {
+                        $side = 'away';
+                    }
+
+                    return [
+                        'id'                   => (int) $row->id,
+                        'match_id'             => (int) $row->match_id,
+                        'minute'               => $row->minute,
+                        'type'                 => $row->type,
+                        'side'                 => $side,
+                        'team_id'              => $row->team_id,
+                        'team_name'            => $row->team_name,
+                        'player_id'            => $row->player_id,
+                        'player_name'          => $row->player_name,
+                        'related_player_id'    => $row->related_player_id,
+                        'related_player_name'  => $row->related_player_name,
+                        'detail'               => $row->detail,
+                        // Formato “rico” para el frontend
+                        'player' => $row->player_id ? [
+                            'id'   => $row->player_id,
+                            'name' => $row->player_name,
+                        ] : null,
+                        'related_player' => $row->related_player_id ? [
+                            'id'   => $row->related_player_id,
+                            'name' => $row->related_player_name,
+                        ] : null,
+                    ];
                 })
                 ->values();
         }

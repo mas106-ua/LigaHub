@@ -29,6 +29,7 @@ class MatchModel extends Model
 
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function league(): BelongsTo { return $this->belongsTo(League::class); }
@@ -42,4 +43,5 @@ class MatchModel extends Model
             ->orderBy('minute')
             ->orderBy('id');
     }
+    public function isEditable(): bool { return $this->edit_status !== 'verified'; }
 }

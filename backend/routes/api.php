@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AdminMatchResultController;
 use App\Http\Controllers\Api\AdminMatchLineupController;
 use App\Http\Controllers\Api\TeamPlayersController;
 use App\Http\Controllers\Api\MatchEventsAdminController;
+use App\Http\Controllers\Api\MatchLockController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -69,4 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
         '/admin/matches/{match}/events',
         [MatchEventsAdminController::class, 'sync']
     );
+
+    Route::post('/admin/matches/{match}/open',   [MatchLockController::class, 'open']);
+    Route::post('/admin/matches/{match}/close',  [MatchLockController::class, 'close']);
+    Route::post('/admin/matches/{match}/verify', [MatchLockController::class, 'verify']);
 });

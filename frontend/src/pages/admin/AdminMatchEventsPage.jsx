@@ -206,12 +206,14 @@ export default function AdminMatchEventsPage() {
                       value={ev.type}
                       onChange={(e) => {
                         const newType = e.target.value;
-                        updateEvent(idx, {
-                          type: newType,
-                          // si deja de ser cambio, limpiamos el que sale
-                          related_player_id:
-                            newType === "sub_in" ? ev.related_player_id : "",
-                        });
+                        const patch = { type: newType };
+
+                        // Solo limpiamos el jugador que sale si el tipo deja de ser "Cambio"
+                        if (newType !== "sub_in") {
+                          patch.related_player_id = "";
+                        }
+
+                        updateEvent(idx, patch);
                       }}
                     >
                       <option value="">—</option>
@@ -249,7 +251,10 @@ export default function AdminMatchEventsPage() {
                           related_player_id: e.target.value,
                         })
                       }
-                      disabled={!isSub}
+                      // Solo se puede elegir mientras sea "Cambio" y todavía NO haya valor.
+                      disabled={
+                        !isSub || (ev.related_player_id !== "" && ev.related_player_id !== null)
+                      }
                     >
                       <option value="">—</option>
                       {players.map((p) => (
