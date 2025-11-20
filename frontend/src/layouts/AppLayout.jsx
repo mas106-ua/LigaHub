@@ -47,13 +47,13 @@ export default function AppLayout() {
             {/* Accesos directos públicos */}
             <nav className="d-flex gap-3">
               {/* Profesionales (de momento abren /ligas con level=pro) */}
-              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro">
+              <Link className="text-white-50 text-decoration-none" to="/comp/213">
                 LALIGA
               </Link>
-              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro&gender=female">
+              <Link className="text-white-50 text-decoration-none" to="/comp/240">
                 LIGA F
               </Link>
-              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro">
+              <Link className="text-white-50 text-decoration-none" to="/comp/214">
                 LIGA HYPERMOTION
               </Link>
 

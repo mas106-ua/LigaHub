@@ -23,6 +23,8 @@ import AdminMatchLineupsPage from "./pages/admin/AdminMatchLineupsPage";
 import AdminMatchEventsPage from "./pages/admin/AdminMatchEventsPage";
 import StandingsPage from "./pages/standings/StandingsPage";
 import LeagueStatsPage from "./pages/LeagueStatsPage";
+import LeagueDetailPage from "./pages/LeagueDetailPage";
+import LeagueTeamsPage from "./pages/LeagueTeamsPage";
 
 
 export default function App() {
@@ -35,15 +37,19 @@ export default function App() {
             {/* Home autenticado */}
             <Route index element={<Home />} />
             <Route path="ligas" element={<CompetitionsPage />} /> {/* alias opcional */}
+            <Route path="/comp/:leagueId" element={<LeagueDetailPage />} />
             <Route path="/comp/:leagueId/jornadas" element={<MatchdaysPage />} />
+            <Route path="/comp/:leagueId/clasificacion" element={<StandingsPage />} />
+            <Route path="/comp/:leagueId/estadisticas" element={<LeagueStatsPage />} />
+            <Route path="/comp/:leagueId/equipos" element={<LeagueTeamsPage />} />
             <Route path="/partido/:id" element={<MatchDetailLayout />}>
               <Route index element={<Navigate to="eventos" replace />} />
               <Route path="eventos" element={<EventsTab />} />
               <Route path="alineaciones" element={<LineupsTab />} />
               <Route path="estadisticas" element={<StatsTab />} />
             </Route>
-            <Route path="/comp/:leagueId/clasificacion" element={<StandingsPage />} />
-            <Route path="/comp/:leagueId/estadisticas" element={<LeagueStatsPage />} />
+
+            
 
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

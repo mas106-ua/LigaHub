@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchLeagueStats } from "../api/leagueStats";
+import api from "../api/api";
+import LeagueHeader from "../components/league/LeagueHeader";
 
 function getErrorMessage(error) {
   if (!error) return "Error desconocido";
@@ -15,6 +17,17 @@ export default function LeagueStatsPage() {
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState(null);
+
+  const [detail, setDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+
+  useEffect(() => {
+    setLoadingDetail(true);
+    api.get(`/api/leagues/${leagueId}/detail`)
+      .then((r) => setDetail(r.data.data))
+      .catch(() => setDetail(null))
+      .finally(() => setLoadingDetail(false));
+  }, [leagueId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +83,9 @@ export default function LeagueStatsPage() {
 
   return (
     <div className="container py-4">
+      {!loadingDetail && detail && (
+        <LeagueHeader detail={detail} active="estadisticas" />
+      )}
       <h3 className="mb-3">
         Estadísticas — {league?.name}{" "}
         {league?.season ? `(${league.season})` : null}
