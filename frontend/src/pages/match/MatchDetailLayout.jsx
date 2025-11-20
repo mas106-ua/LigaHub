@@ -4,6 +4,7 @@ import { getMatchDetail } from "../../api/matchdays";
 import MatchTabs from "./MatchTabs";
 import { useAuth } from "../../context/AuthContext";
 import { openMatch, closeMatch, verifyMatch } from "../../api/adminMatches";
+import { getMatchReport, uploadMatchReport } from "../../api/matchReports";
 
 export default function MatchDetailLayout() {
   const { id } = useParams();
@@ -12,6 +13,12 @@ export default function MatchDetailLayout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lockLoading, setLockLoading] = useState(false);
+
+  // estado para el acta PDF
+  const [report, setReport] = useState(null);
+  const [loadingReport, setLoadingReport] = useState(true);
+  const [uploadingReport, setUploadingReport] = useState(false);
+  const [reportError, setReportError] = useState("");
 
   const isAdmin =
     user && user.role && user.role.toLowerCase().includes("admin");
@@ -43,6 +50,59 @@ export default function MatchDetailLayout() {
     const cleanup = loadMatch();
     return cleanup;
   }, [loadMatch]);
+
+  // cargar info del acta PDF
+  useEffect(() => {
+    if (!id) return;
+    let alive = true;
+
+    setLoadingReport(true);
+    setReportError("");
+
+    getMatchReport(id)
+      .then((data) => {
+        if (!alive) return;
+        // data = null (no hay acta) o { id, match_id, url, uploaded_at... }
+        setReport(data);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setReport(null);       // sin acta
+      })
+      .finally(() => {
+        if (!alive) return;
+        setLoadingReport(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  const handleReportUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      alert("El archivo debe ser un PDF.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingReport(true);
+      setReportError("");
+      const data = await uploadMatchReport(id, file);
+      setReport(data);
+    } catch (err) {
+      console.error(err);
+      setReportError("No se ha podido subir el acta.");
+    } finally {
+      setUploadingReport(false);
+      // permitir volver a elegir el mismo archivo si hace falta
+      e.target.value = "";
+    }
+  };
 
   const handleLockAction = async (action) => {
     if (!match) return;
@@ -98,6 +158,7 @@ export default function MatchDetailLayout() {
 
   const canClose = editStatus === "open";
   const canVerify = editStatus !== "verified" && match.status === "played";
+  const hasReport = !!(report && report.url);
 
   return (
     <div className="container">
@@ -186,6 +247,60 @@ export default function MatchDetailLayout() {
                   )}
                 </div>
               )}
+
+              {/* Bloque acta PDF (visible para todos; subir solo admin/superadmin) */}
+              <div className="mt-3 d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                <small className="text-muted">
+                  Acta de partido:
+                </small>
+
+                {loadingReport ? (
+                  <span className="small text-muted">Cargando…</span>
+                ) : hasReport ? (
+                  <>
+                    <a
+                      href={report.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-sm btn-outline-secondary"
+                    >
+                      Descargar acta (PDF)
+                    </a>
+                    {report.uploaded_at && (
+                      <span className="small text-muted">
+                        Actualizada: {new Date(report.uploaded_at).toLocaleString()}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="small text-muted">
+                    No hay acta disponible.
+                  </span>
+                )}
+
+                {(user?.role === "admin" || user?.role === "superadmin") && (
+                  <label className="btn btn-sm btn-outline-secondary mb-0">
+                    {uploadingReport
+                      ? "Subiendo…"
+                      : hasReport
+                      ? "Reemplazar acta"
+                      : "Subir acta"}
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      hidden
+                      onChange={handleReportUpload}
+                      disabled={uploadingReport}
+                    />
+                  </label>
+                )}
+
+                {reportError && (
+                  <span className="small text-danger w-100 mt-1">
+                    {reportError}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Visitante */}
@@ -209,7 +324,7 @@ export default function MatchDetailLayout() {
   );
 }
 
-function TeamBlock({ team, score, align="start" }) {
+function TeamBlock({ team, score, align = "start" }) {
   return (
     <div className={`d-flex flex-column ${align === "end" ? "align-items-end" : "align-items-start"}`}>
       <div className="fw-semibold">{team.name}</div>
