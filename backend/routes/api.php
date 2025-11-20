@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\MatchLockController;
 use App\Http\Controllers\Api\PublicStandingsController;
 use App\Http\Controllers\Api\PublicLeagueStatsController;
 use App\Http\Controllers\Api\AdminLeagueStatsController;
+use App\Http\Controllers\Api\PublicLeagueDetailController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -44,6 +45,7 @@ Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
 Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
 Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
 Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
+Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {
