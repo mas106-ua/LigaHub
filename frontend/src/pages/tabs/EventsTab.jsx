@@ -1,16 +1,16 @@
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function EventsTab() {
   const { match } = useOutletContext();
-  const events = Array.isArray(match.events) ? [...match.events] : [];
+  const { user } = useAuth();
 
-  if (!events.length)
-    return <div className="text-muted">No hay eventos para este partido.</div>;
+  const events = Array.isArray(match.events) ? [...match.events] : [];
 
   // Orden por minuto (null al final) y por id
   events.sort((a, b) => {
-    const ma = a.minute ?? 9999,
-      mb = b.minute ?? 9999;
+    const ma = a.minute ?? 9999;
+    const mb = b.minute ?? 9999;
     if (ma !== mb) return ma - mb;
     return (a.id || 0) - (b.id || 0);
   });
@@ -18,8 +18,7 @@ export default function EventsTab() {
   const sections = {
     goals: events.filter((e) => e.type === "goal" || e.type === "own_goal"),
     cards: events.filter((e) => e.type === "yellow" || e.type === "red"),
-    // solo nos quedamos con sub_in como “cambio”
-    subs: events.filter((e) => e.type === "sub_in"),
+    subs: events.filter((e) => e.type === "sub_in"), // cambios
     others: events.filter(
       (e) =>
         !["goal", "own_goal", "yellow", "red", "sub_in", "sub_out"].includes(
@@ -35,7 +34,6 @@ export default function EventsTab() {
     const relatedName = e.related_player?.name ?? e.related_player_name ?? "";
     const detail = e.detail ?? e.description ?? "";
 
-    // Texto por defecto para goles/tarjetas/otros
     const normalText = (
       <>
         {mainName}
@@ -63,7 +61,9 @@ export default function EventsTab() {
                     {/* Sale */}
                     {relatedName && (
                       <>
-                        <span className="badge badge-team-home ms-3 me-2">Sale</span>
+                        <span className="badge badge-team-home ms-3 me-2">
+                          Sale
+                        </span>
                         {relatedName}
                       </>
                     )}
@@ -130,42 +130,67 @@ export default function EventsTab() {
     );
   };
 
+  const canManage =
+    user && (user.role === "admin" || user.role === "superadmin");
+
+  const hasEvents = events.length > 0;
+
   return (
     <div className="events-sections">
-      {sections.goals.length > 0 && (
-        <section className="card mb-3">
-          <div className="card-header">
-            <h6 className="m-0">Goles</h6>
-          </div>
-          <div className="list-body">{sections.goals.map(renderRow)}</div>
-        </section>
+      {/* Botón para ir a la UI de administración de eventos */}
+      {canManage && (
+        <div className="d-flex justify-content-end mb-3">
+          <Link
+            to={`/admin/partidos/${match.id}/eventos`}
+            className="btn btn-sm btn-outline-secondary"
+          >
+            Gestionar eventos
+          </Link>
+        </div>
       )}
 
-      {sections.cards.length > 0 && (
-        <section className="card mb-3">
-          <div className="card-header">
-            <h6 className="m-0">Tarjetas</h6>
-          </div>
-          <div className="list-body">{sections.cards.map(renderRow)}</div>
-        </section>
+      {!hasEvents && (
+        <div className="text-muted">No hay eventos para este partido.</div>
       )}
 
-      {sections.subs.length > 0 && (
-        <section className="card mb-3">
-          <div className="card-header">
-            <h6 className="m-0">Sustituciones</h6>
-          </div>
-          <div className="list-body">{sections.subs.map(renderRow)}</div>
-        </section>
-      )}
+      {hasEvents && (
+        <>
+          {sections.goals.length > 0 && (
+            <section className="card mb-3">
+              <div className="card-header">
+                <h6 className="m-0">Goles</h6>
+              </div>
+              <div className="list-body">{sections.goals.map(renderRow)}</div>
+            </section>
+          )}
 
-      {sections.others.length > 0 && (
-        <section className="card mb-3">
-          <div className="card-header">
-            <h6 className="m-0">Otros</h6>
-          </div>
-          <div className="list-body">{sections.others.map(renderRow)}</div>
-        </section>
+          {sections.cards.length > 0 && (
+            <section className="card mb-3">
+              <div className="card-header">
+                <h6 className="m-0">Tarjetas</h6>
+              </div>
+              <div className="list-body">{sections.cards.map(renderRow)}</div>
+            </section>
+          )}
+
+          {sections.subs.length > 0 && (
+            <section className="card mb-3">
+              <div className="card-header">
+                <h6 className="m-0">Sustituciones</h6>
+              </div>
+              <div className="list-body">{sections.subs.map(renderRow)}</div>
+            </section>
+          )}
+
+          {sections.others.length > 0 && (
+            <section className="card mb-3">
+              <div className="card-header">
+                <h6 className="m-0">Otros</h6>
+              </div>
+              <div className="list-body">{sections.others.map(renderRow)}</div>
+            </section>
+          )}
+        </>
       )}
     </div>
   );

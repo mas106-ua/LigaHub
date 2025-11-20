@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { getStandings } from "../../api/standings";
 
+import LeagueHeader from "../../components/league/LeagueHeader";
+import api from "../../api/api";
+
 export default function StandingsPage() {
   const { leagueId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +15,17 @@ export default function StandingsPage() {
 
   const matchdayParam = searchParams.get("matchday");
   const groupParam = searchParams.get("group");
+
+  const [detail, setDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+
+  useEffect(() => {
+    setLoadingDetail(true);
+    api.get(`/api/leagues/${leagueId}/detail`)
+      .then((r) => setDetail(r.data.data))
+      .catch(() => setDetail(null))
+      .finally(() => setLoadingDetail(false));
+  }, [leagueId]);
 
   useEffect(() => {
     setLoading(true);
@@ -75,7 +89,9 @@ export default function StandingsPage() {
 
   return (
     <div className="container py-4">
-      {/* Cabecera + filtros */}
+      {!loadingDetail && detail && (
+        <LeagueHeader detail={detail} active="clasificacion" />
+      )}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h2 className="h4 mb-1">
