@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\MatchReport;
 use App\Models\MatchLineup;
 
 class MatchModel extends Model
@@ -44,4 +46,9 @@ class MatchModel extends Model
             ->orderBy('id');
     }
     public function isEditable(): bool { return $this->edit_status !== 'verified'; }
+    public function report(): HasOne
+    {
+        return $this->hasOne(MatchReport::class, 'match_id');
+    }
+
 }

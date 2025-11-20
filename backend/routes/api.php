@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\PublicStandingsController;
 use App\Http\Controllers\Api\PublicLeagueStatsController;
 use App\Http\Controllers\Api\AdminLeagueStatsController;
 use App\Http\Controllers\Api\PublicLeagueDetailController;
+use App\Http\Controllers\Api\AdminMatchReportController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -93,4 +94,8 @@ Route::middleware('auth:sanctum')->group(function () {
         [AdminLeagueStatsController::class, 'sync']
     );
 
+    Route::post(
+        '/admin/matches/{match}/report',
+        [AdminMatchReportController::class, 'upload']
+    );
 });
