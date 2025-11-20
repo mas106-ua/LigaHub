@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\PublicLeagueStatsController;
 use App\Http\Controllers\Api\AdminLeagueStatsController;
 use App\Http\Controllers\Api\PublicLeagueDetailController;
 use App\Http\Controllers\Api\AdminMatchReportController;
+use App\Http\Controllers\Api\PublicMatchReportController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -32,6 +33,8 @@ Route::get('/regions', [RegionController::class, 'index']);
 Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/competitions', [CompetitionController::class, 'index']);
 Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
+
+Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
 
 // Listar jornadas de una liga (opcional: ?group=ID|code)
 Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
@@ -94,8 +97,6 @@ Route::middleware('auth:sanctum')->group(function () {
         [AdminLeagueStatsController::class, 'sync']
     );
 
-    Route::post(
-        '/admin/matches/{match}/report',
-        [AdminMatchReportController::class, 'upload']
-    );
+    Route::post('/admin/matches/{match}/report', [\App\Http\Controllers\Api\AdminMatchReportController::class, 'upload']);
+    Route::delete('/admin/matches/{match}/report', [\App\Http\Controllers\Api\AdminMatchReportController::class, 'destroy']);
 });
