@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\TeamPlayersController;
 use App\Http\Controllers\Api\MatchEventsAdminController;
 use App\Http\Controllers\Api\MatchLockController;
 use App\Http\Controllers\Api\PublicStandingsController;
+use App\Http\Controllers\Api\PublicLeagueStatsController;
+use App\Http\Controllers\Api\AdminLeagueStatsController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -40,6 +42,8 @@ Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups'])
 Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
 Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
 Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
+Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
+Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {
@@ -76,4 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/matches/{match}/open',   [MatchLockController::class, 'open']);
     Route::post('/admin/matches/{match}/close',  [MatchLockController::class, 'close']);
     Route::post('/admin/matches/{match}/verify', [MatchLockController::class, 'verify']);
+
+    Route::get(
+        '/admin/leagues/{league}/stats/overrides',
+        [AdminLeagueStatsController::class, 'index']
+    );
+
+    Route::put(
+        '/admin/leagues/{league}/stats/overrides',
+        [AdminLeagueStatsController::class, 'sync']
+    );
+
 });
