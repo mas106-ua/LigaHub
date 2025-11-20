@@ -21,6 +21,7 @@ import StatsTab from "./pages/tabs/StatsTab";
 import AdminMatchdayResultsPage from "./pages/admin/AdminMatchdayResultsPage";
 import AdminMatchLineupsPage from "./pages/admin/AdminMatchLineupsPage";
 import AdminMatchEventsPage from "./pages/admin/AdminMatchEventsPage";
+import StandingsPage from "./pages/standings/StandingsPage";
 
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="alineaciones" element={<LineupsTab />} />
               <Route path="estadisticas" element={<StatsTab />} />
             </Route>
+            <Route path="/comp/:leagueId/clasificacion" element={<StandingsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
