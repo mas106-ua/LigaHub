@@ -162,6 +162,26 @@ class PublicMatchDetailController extends Controller
             })->values();
         }
 
+        // 3.1) Acta PDF (si existe)
+        $report = null;
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('match_reports')) {
+            $row = \Illuminate\Support\Facades\DB::table('match_reports')
+                ->where('match_id', $match->id)
+                ->orderByDesc('generated_at')
+                ->first();
+
+            if ($row && $row->file_path) {
+                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($row->file_path);
+
+                $report = [
+                    'file_path'    => $row->file_path,
+                    'url'          => $url,
+                    'generated_at' => optional($row->generated_at)->format('Y-m-d H:i:s'),
+                    'checksum'     => $row->checksum,
+                ];
+            }
+        }
 
         // 4) Respuesta
         return response()->json([
@@ -197,6 +217,7 @@ class PublicMatchDetailController extends Controller
                 'events' => $events,     // contiene minute,type,team_name,player_name,detail,side…
                 'team_stats' => $teamStats, // si existe la tabla
                 'lineups'    => $lineups,
+                'report'     => $report,
                 'status'      => $match->status,
                 'edit_status' => $match->edit_status,
                 'verified_at' => $match->verified_at,
