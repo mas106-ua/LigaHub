@@ -19,8 +19,13 @@ class DatabaseSeeder extends Seeder
         RegionsSeeder::class,
         CategoriesSeeder::class,
         SeasonsSeeder::class,
-        LeaguesDemoSeeder::class,
+        ProvincesSeeder::class,
+        OfficialCompetitionsSeeder::class,
+        BackfillLeagueProvinceSeeder::class,
         SuperAdminSeeder::class,
+        AdminUsersSeeder::class,
+        TeamsAndFixturesSeeder::class,
+        TestLineupsPlayersSeeder::class,
     ]);
     }
 }

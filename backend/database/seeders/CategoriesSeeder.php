@@ -9,13 +9,21 @@ class CategoriesSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('categories')->insert([
-            ['name' => 'Alevín',   'level' => 'amateur', 'gender' => 'mixed'],
-            ['name' => 'Infantil', 'level' => 'amateur', 'gender' => 'mixed'],
-            ['name' => 'Cadete',   'level' => 'amateur', 'gender' => 'mixed'],
-            ['name' => 'Juvenil',  'level' => 'amateur', 'gender' => 'mixed'],
-            ['name' => 'Senior',   'level' => 'semi',    'gender' => 'male'],
-            ['name' => 'Femenino Senior', 'level' => 'semi', 'gender' => 'female'],
-        ]);
+        $cats = [
+            // Senior masculino
+            ['name' => 'Senior', 'level' => 'pro',     'gender' => 'male'],
+            ['name' => 'Senior', 'level' => 'semi',    'gender' => 'male'],
+            ['name' => 'Senior', 'level' => 'amateur', 'gender' => 'male'],
+            // Senior femenino
+            ['name' => 'Senior', 'level' => 'pro',     'gender' => 'female'],
+            ['name' => 'Senior', 'level' => 'semi',    'gender' => 'female'],
+            ['name' => 'Senior', 'level' => 'amateur', 'gender' => 'female'],
+            // Juvenil nacional masculino
+            ['name' => 'Juvenil Nacional', 'level' => 'amateur', 'gender' => 'male'],
+        ];
+
+        foreach ($cats as $c) {
+            DB::table('categories')->updateOrInsert($c, $c);
+        }
     }
 }
