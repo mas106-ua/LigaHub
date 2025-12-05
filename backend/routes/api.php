@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\AdminLeagueStatsController;
 use App\Http\Controllers\Api\PublicLeagueDetailController;
 use App\Http\Controllers\Api\AdminMatchReportController;
 use App\Http\Controllers\Api\PublicMatchReportController;
+use App\Http\Controllers\Api\SeasonController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -32,6 +33,7 @@ Route::post('/auth/login', [LoginController::class, 'store']);
 Route::get('/regions', [RegionController::class, 'index']);
 Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/competitions', [CompetitionController::class, 'index']);
+Route::get('/seasons', [SeasonController::class, 'index']);
 Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
 
 Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
