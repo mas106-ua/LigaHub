@@ -52,6 +52,7 @@ Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'sh
 Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
 Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
 Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
+Route::get('/leagues/{league}/versions', [CompetitionController::class, 'versions']);
 
 // Auth protegida
 Route::middleware('auth:sanctum')->group(function () {

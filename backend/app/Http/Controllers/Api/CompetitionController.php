@@ -179,4 +179,66 @@ class CompetitionController extends Controller
 
         return response()->json(['data' => $siblings]);
     }
+
+    public function versions(League $league): JsonResponse
+    {
+        // Cargar competition + season de la liga actual
+        $league->loadMissing(['competition', 'season']);
+
+        $competition = $league->competition;
+
+        // Si NO tiene competition_id (ligas privadas/antiguas):
+        // devolvemos solo esa liga como única versión
+        if (!$competition) {
+            return response()->json([
+                'competition' => null,
+                'versions' => [[
+                    'league_id'   => $league->id,
+                    'season_id'   => $league->season?->id,
+                    'season_code' => $league->season?->code,
+                    'group_name'  => $league->group_name,
+                    'is_current'  => true,
+                ]],
+            ]);
+        }
+
+        $groupName = $league->group_name;
+
+        // Buscar TODAS las leagues de la MISMA competición
+        // y del MISMO grupo (si group_name no es null)
+        $rows = League::query()
+            ->where('competition_id', $competition->id)
+            ->when($groupName !== null, function ($q) use ($groupName) {
+                $q->where('group_name', $groupName);
+            }, function ($q) {
+                $q->whereNull('group_name');
+            })
+            ->leftJoin('seasons', 'seasons.id', '=', 'leagues.season_id')
+            ->orderByDesc('seasons.start_date')
+            ->get([
+                'leagues.id as league_id',
+                'leagues.group_name',
+                'seasons.id as season_id',
+                'seasons.code as season_code',
+            ]);
+
+        $versions = $rows->map(function ($row) use ($league) {
+            return [
+                'league_id'   => (int) $row->league_id,
+                'season_id'   => $row->season_id,
+                'season_code' => $row->season_code,
+                'group_name'  => $row->group_name,
+                'is_current'  => (int) $row->league_id === (int) $league->id,
+            ];
+        });
+
+        return response()->json([
+            'competition' => [
+                'id'   => $competition->id,
+                'name' => $competition->name,
+                'code' => $competition->code,
+            ],
+            'versions' => $versions,
+        ]);
+    }
 }
