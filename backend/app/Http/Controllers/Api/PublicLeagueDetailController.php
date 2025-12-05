@@ -22,12 +22,21 @@ class PublicLeagueDetailController extends Controller
      */
     public function show(League $league): JsonResponse
     {
-        // Cargamos relaciones básicas
+        // Cargamos relaciones básicas del modelo nuevo
         $league->loadMissing([
             'category:id,name',
             'season:id,code',
             'region:id,code,name',
+
+            // nuevo: datos estables desde Competition
+            'competition.category:id,name,level,gender',
+            'competition.region:id,code,name',
         ]);
+
+        // Preferimos datos de Competition; si no hay, usamos League (compat privado/antiguo)
+        $competition   = $league->competition;
+        $categoryModel = $competition?->category ?? $league->category;
+        $regionModel   = $competition?->region   ?? $league->region;
 
         // 1) Grupos (usando league_teams.group_name)
         $groupRows = DB::table('league_teams')
@@ -81,7 +90,6 @@ class PublicLeagueDetailController extends Controller
                 't.id as id',
                 't.name as name',
                 't.short_name as short_name',
-                // exponemos group_name como "group" en la respuesta
                 'lt.group_name as group',
             ]);
 
@@ -110,21 +118,20 @@ class PublicLeagueDetailController extends Controller
                     'code' => $league->season?->code,
                 ],
 
+                // 👇 ahora usan $categoryModel / $regionModel
                 'category' => [
-                    'id'   => $league->category?->id,
-                    'name' => $league->category?->name,
+                    'id'   => $categoryModel?->id,
+                    'name' => $categoryModel?->name,
                 ],
 
                 'region' => [
-                    'id'   => $league->region?->id,
-                    'code' => $league->region?->code,
-                    'name' => $league->region?->name,
+                    'id'   => $regionModel?->id,
+                    'code' => $regionModel?->code,
+                    'name' => $regionModel?->name,
                 ],
 
-                // Lista de grupos disponibles para filtros
                 'groups' => $groups->values(),
 
-                // Rango de jornadas y resumen de partidos
                 'matchdays' => [
                     'min'            => $minMatchday,
                     'max'            => $maxMatchday,
@@ -132,17 +139,14 @@ class PublicLeagueDetailController extends Controller
                     'played_matches' => (int) ($totals->played_matches ?? 0),
                 ],
 
-                // Equipos participantes en esta liga
                 'teams' => $teams,
 
-                // Flags para saber qué pestañas tienen sentido
                 'features' => [
                     'has_matchdays' => $minMatchday !== null,
                     'has_standings' => $hasStandings,
                     'has_stats'     => $hasStats,
                 ],
 
-                // Enlaces sugeridos a otros endpoints de la API
                 'links' => [
                     'matchdays' => "/api/leagues/{$league->id}/matchdays",
                     'standings' => "/api/leagues/{$league->id}/standings",
@@ -151,4 +155,5 @@ class PublicLeagueDetailController extends Controller
             ],
         ]);
     }
+
 }
