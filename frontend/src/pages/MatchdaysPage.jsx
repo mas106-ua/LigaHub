@@ -10,6 +10,7 @@ import api from "../api/api";
 import MatchRow from "../components/Matchs/MatchRow";
 import SiblingsTabs from "../components/Matchs/SiblingsTabs";
 import LeagueHeader from "../components/league/LeagueHeader";
+import LeagueSeasonSwitcher from "../components/league/LeagueSeasonSwitcher";
 
 export default function MatchdaysPage() {
   const { leagueId } = useParams();
@@ -118,7 +119,10 @@ export default function MatchdaysPage() {
   return (
     <div className="container py-4">
       {!loadingDetail && detail && (
-        <LeagueHeader detail={detail} active="jornadas" />
+        <>
+          <LeagueHeader detail={detail} active="jornadas" />
+          <LeagueSeasonSwitcher />
+        </>
       )}
       <div className="d-flex align-items-center justify-content-between mb-3">
         <h1 className="h4 m-0">Jornadas</h1>

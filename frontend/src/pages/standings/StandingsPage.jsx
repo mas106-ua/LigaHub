@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { getStandings } from "../../api/standings";
+import LeagueSeasonSwitcher from "../../components/league/LeagueSeasonSwitcher";
 
 import LeagueHeader from "../../components/league/LeagueHeader";
 import api from "../../api/api";
@@ -90,7 +91,10 @@ export default function StandingsPage() {
   return (
     <div className="container py-4">
       {!loadingDetail && detail && (
-        <LeagueHeader detail={detail} active="clasificacion" />
+        <>
+          <LeagueHeader detail={detail} active="clasificacion" />
+          <LeagueSeasonSwitcher />
+        </>
       )}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
