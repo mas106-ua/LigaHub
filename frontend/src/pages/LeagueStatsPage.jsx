@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchLeagueStats } from "../api/leagueStats";
 import api from "../api/api";
 import LeagueHeader from "../components/league/LeagueHeader";
+import LeagueSeasonSwitcher from "../components/league/LeagueSeasonSwitcher";
 
 function getErrorMessage(error) {
   if (!error) return "Error desconocido";
@@ -84,7 +85,10 @@ export default function LeagueStatsPage() {
   return (
     <div className="container py-4">
       {!loadingDetail && detail && (
-        <LeagueHeader detail={detail} active="estadisticas" />
+        <>
+          <LeagueHeader detail={detail} active="estadisticas" />
+          <LeagueSeasonSwitcher />
+        </>
       )}
       <h3 className="mb-3">
         Estadísticas — {league?.name}{" "}

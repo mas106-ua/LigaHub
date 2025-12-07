@@ -1,27 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fetchLeagueDetail } from "../api/leagueDetail";
-import { fetchLeagueVersions } from "../api/leagueVersions";
-import LeagueTabs from "./LeagueTabs";
 import LeagueHeader from "../components/league/LeagueHeader";
-
-function getErrorMessage(error) {
-  if (!error) return "Error desconocido";
-  const res = error.response;
-  if (res?.data?.message) return res.data.message;
-  return error.message || "Error de red";
-}
+import LeagueSeasonSwitcher from "../components/league/LeagueSeasonSwitcher";
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
-  const navigate = useNavigate();
-
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
-
-  const [versionsData, setVersionsData] = useState(null);
-  const [versionsLoading, setVersionsLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,30 +32,6 @@ export default function LeagueDetailPage() {
       cancelled = true;
     };
   }, [leagueId]);
-
-    useEffect(() => {
-    let cancelled = false;
-    setVersionsLoading(true);
-    setVersionsData(null);
-
-    fetchLeagueVersions(leagueId)
-      .then((data) => {
-        if (cancelled) return;
-        setVersionsData(data);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("Error al cargar versiones de la liga", err);
-      })
-      .finally(() => {
-        if (!cancelled) setVersionsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [leagueId]);
-
 
   const groupedTeams = useMemo(() => {
     if (!detail?.teams) return [];
@@ -132,44 +95,10 @@ export default function LeagueDetailPage() {
 
   const { name, season, category, region, matchdays, features } = detail;
 
-  // Datos de versiones para el selector de temporada
-  const availableVersions = versionsData?.versions || [];
-  const selectedLeagueId = String(leagueId);
-
-  const handleSeasonChange = (e) => {
-    const targetLeagueId = e.target.value;
-    if (!targetLeagueId || targetLeagueId === selectedLeagueId) return;
-    navigate(`/comp/${targetLeagueId}`);
-  };
-
-
   return (
     <div className="container py-4">
       <LeagueHeader detail={detail} active="resumen" />
-
-      {/* Selector de temporada (solo si hay más de una versión) */}
-      {availableVersions.length > 1 && (
-        <div className="mb-3 d-flex justify-content-end">
-          <div className="d-flex align-items-center gap-2">
-            <label htmlFor="seasonSwitcher" className="mb-0">
-              Temporada:
-            </label>
-            <select
-              id="seasonSwitcher"
-              className="form-select form-select-sm"
-              value={selectedLeagueId}
-              onChange={handleSeasonChange}
-              disabled={versionsLoading}
-            >
-              {availableVersions.map((v) => (
-                <option key={v.league_id} value={v.league_id}>
-                  {v.season_code || "Sin temporada"}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
+      <LeagueSeasonSwitcher />
 
       <div className="row">
         {/* Columna izquierda: resumen */}
