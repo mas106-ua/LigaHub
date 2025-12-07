@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import LeagueMeta from "./LeagueMeta";
 
 /**
  * detail = lo que devuelve /api/leagues/{id}/detail (data)
@@ -7,21 +8,15 @@ import { NavLink } from "react-router-dom";
 export default function LeagueHeader({ detail, active }) {
   if (!detail) return null;
 
-  const leagueId   = detail.id;
-  const seasonCode = detail.season?.code || "";
-  const category   = detail.category?.name || "";
-  const title      = detail.name || "Liga";
+  const leagueId = detail.id;
+  const title    = detail.name || "Liga";
 
   return (
     <header className="mb-4">
       {/* TÍTULO + SUBTÍTULO */}
       <div className="mb-3">
         <h2 className="h3 mb-1">{title}</h2>
-        <div className="text-muted">
-          {seasonCode && <>Temporada {seasonCode}</>}
-          {seasonCode && category && " · "}
-          {category}
-        </div>
+        <LeagueMeta detail={detail} />
       </div>
 
       {/* TABS DE NAVEGACIÓN */}
