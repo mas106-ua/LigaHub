@@ -22,27 +22,81 @@ class OfficialCompetitionsSeeder extends Seeder
         $catId = fn(string $name, string $level, string $gender) =>
             DB::table('categories')->where(compact('name','level','gender'))->value('id');
 
-        $createLeague = function (array $attrs) use ($now) {
-            // Clave "única" lógica para evitar duplicados: name + season_id
+        $createCompetition = function (string $baseName, int $categoryId, string $level, string $gender, ?int $regionId = null) use ($now) {
+            // Genera un slug único a partir del nombre
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $baseName)));
+            $defaults = [
+                'name'        => $baseName,
+                'code'        => $slug,
+                'category_id' => $categoryId,
+                'level'       => $level,
+                'gender'      => $gender,
+                'region_id'   => $regionId,
+                'province_id' => null,
+                'type'        => 'official',
+                'is_active'   => true,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ];
+            DB::table('competitions')->updateOrInsert(['code' => $slug], $defaults);
+            return DB::table('competitions')->where('code', $slug)->value('id');
+        };
+
+        /**
+         * Analiza un nombre de liga para separar la competición base y el nombre de grupo.
+         * Devuelve un array con [baseName, groupName|null].
+         */
+        $parseLeagueName = function (string $name): array {
+            $base  = $name;
+            $group = null;
+            // Si hay paréntesis al final, usar contenido como nombre de grupo
+            if (preg_match('/^(.*)\(([^)]+)\)\s*$/u', $name, $m)) {
+                $base  = trim($m[1]);
+                $group = trim($m[2]);
+            } elseif (preg_match('/^(.+?)\s+–\s+(.+)$/u', $name, $m)) {
+                // Separar por guion largo con espacios
+                $base  = trim($m[1]);
+                $group = trim($m[2]);
+            }
+            return [$base, $group ?: null];
+        };
+
+        $createLeague = function (array $attrs) use ($now, $createCompetition, $parseLeagueName) {
+            // Extrae baseName y groupName del nombre completo
+            [$baseName, $groupName] = $parseLeagueName($attrs['name']);
+
+            // Obtiene nivel y género a partir de la categoría
+            $categoryId = $attrs['category_id'];
+            $catRow = DB::table('categories')->where('id', $categoryId)->first(['level','gender']);
+            $level  = $catRow->level  ?? 'amateur';
+            $gender = $catRow->gender ?? 'mixed';
+
+            // Crea o actualiza la competición base y obtiene su id
+            $competitionId = $createCompetition($baseName, $categoryId, $level, $gender, $attrs['region_id'] ?? null);
+
+            // Clave de búsqueda para evitar duplicados por temporada y grupo
             $where = [
-                'name'      => $attrs['name'],
-                'season_id' => $attrs['season_id'],
+                'competition_id' => $competitionId,
+                'season_id'      => $attrs['season_id'],
+                'group_name'     => $groupName,
             ];
             $defaults = array_merge([
-                'type'          => 'official',
-                'visibility'    => 'public',
-                'access_uuid'   => null,
-                'owner_user_id' => null,
-                'is_active'     => true,
-                'created_at'    => $now,
-                'updated_at'    => $now,
+                'name'           => $attrs['name'],
+                'type'           => 'official',
+                'visibility'     => 'public',
+                'access_uuid'    => null,
+                'owner_user_id'  => null,
+                'is_active'      => true,
+                'created_at'     => $now,
+                'updated_at'     => $now,
+                'competition_id' => $competitionId,
+                'group_name'     => $groupName,
             ], $attrs);
-
             DB::table('leagues')->updateOrInsert($where, $defaults);
         };
 
         // ===== Season codes a sembrar
-        $seasons = ['2024/25','2025/26'];
+        $seasons = ['2021/22','2022/23','2023/24','2024/25','2025/26'];
 
         // ===== Categorías base
         $sen_m_pro  = $catId('Senior','pro','male');
@@ -182,6 +236,29 @@ class OfficialCompetitionsSeeder extends Seeder
                 ]);
             }
 
+            // === Copas nacionales masculinas
+            // Copa del Rey
+            $createLeague([
+                'name'        => 'Copa del Rey',
+                'category_id' => $sen_m_semi,
+                'season_id'   => $sid,
+                'region_id'   => null,
+            ]);
+            // Supercopa de España (masculina)
+            $createLeague([
+                'name'        => 'Supercopa de España',
+                'category_id' => $sen_m_semi,
+                'season_id'   => $sid,
+                'region_id'   => null,
+            ]);
+            // Copa Federación (Copa RFEF)
+            $createLeague([
+                'name'        => 'Copa Federación',
+                'category_id' => $sen_m_am,
+                'season_id'   => $sid,
+                'region_id'   => null,
+            ]);
+
             // === Femenino nacional
             $createLeague(['name'=>'Liga F', 'category_id'=>$sen_f_pro, 'season_id'=>$sid, 'region_id'=>null]);
             $createLeague(['name'=>'Primera Federación Femenina', 'category_id'=>$sen_f_semi, 'season_id'=>$sid, 'region_id'=>null]);
@@ -189,10 +266,41 @@ class OfficialCompetitionsSeeder extends Seeder
             foreach (range(1,3) as $g) {
                 $createLeague(['name'=>"Segunda Federación Femenina – Grupo {$g}", 'category_id'=>$sen_f_semi, 'season_id'=>$sid, 'region_id'=>null]);
             }
-            // Tercera FUTFEM (placeholder 6 grupos nacionales)
-            foreach (range(1,6) as $g) {
-                $createLeague(['name'=>"Tercera Federación FUTFEM – Grupo {$g}", 'category_id'=>$sen_f_am, 'season_id'=>$sid, 'region_id'=>null]);
+            // Tercera FUTFEM
+            // Hasta 2024/25 se usaban 6 grupos nacionales. Desde 2025/26 hay 18 grupos (uno por CCAA, con dos en Andalucía).
+            $futfemGroupCount = ($scode === '2025/26') ? 18 : 6;
+            $futfemRegions    = array_keys($terceraByRegion);
+            for ($g = 1; $g <= $futfemGroupCount; $g++) {
+                // Para las seis primeras temporadas los grupos no tienen asignación territorial específica
+                $regionId = null;
+                // A partir de 2025/26, mapear cada grupo a su región según el orden de $terceraByRegion
+                if ($futfemGroupCount >= 18) {
+                    $key = $futfemRegions[$g - 1] ?? null;
+                    $regionId = $key ? $regId($terceraRegionMap[$key] ?? null) : null;
+                }
+                $createLeague([
+                    'name'        => "Tercera Federación FUTFEM – Grupo {$g}",
+                    'category_id' => $sen_f_am,
+                    'season_id'   => $sid,
+                    'region_id'   => $regionId,
+                ]);
             }
+
+            // Copa de la Reina (competición nacional femenina)
+            $createLeague([
+                'name'        => 'Copa de la Reina',
+                'category_id' => $sen_f_semi,
+                'season_id'   => $sid,
+                'region_id'   => null,
+            ]);
+
+            // Supercopa de España Femenina
+            $createLeague([
+                'name'        => 'Supercopa de España Femenina',
+                'category_id' => $sen_f_semi,
+                'season_id'   => $sid,
+                'region_id'   => null,
+            ]);
 
             // === Juvenil nacional
             // División de Honor (7 grupos)

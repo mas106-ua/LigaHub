@@ -37,6 +37,10 @@ class TeamsAndFixturesSeeder extends Seeder
 
             $group = $cfg['group_name'] ?? 'Único';
 
+            // Determina si hay que simular resultados completos para la temporada
+            // Solo se simulan 2020/21, 2021/22, 2023/24 y 2024/25. El resto quedan programados sin resultados.
+            $simulateFull = in_array($cfg['season_code'], ['2020/21','2021/22','2023/24','2024/25']);
+
             // 1) Equipos + pivot
             $teamIds = [];
             foreach ($cfg['teams'] as $rawName) {
@@ -70,8 +74,22 @@ class TeamsAndFixturesSeeder extends Seeder
                     $cfg['fixtures']['start'] ?? 'first-saturday-of-season',
                     $cfg['fixtures']['kickoff'] ?? [16,0]
                 );
-                $this->roundRobin($league->id, $teamIds, $start);
-                $this->command->info("Calendario generado (ida+vuelta) desde {$start->format('Y-m-d H:i')}");
+                // Detecta si es un torneo por eliminatorias (formato copa). Lo determinamos por el nombre de la liga o por la clave 'format' en el config
+                $isKnockout = false;
+                if (!empty($cfg['format']) && strtolower($cfg['format']) === 'knockout') {
+                    $isKnockout = true;
+                } elseif (stripos($cfg['league_name'], 'copa') !== false || stripos($cfg['league_name'], 'supercopa') !== false) {
+                    $isKnockout = true;
+                }
+                if ($isKnockout) {
+                    // Genera un cuadro de eliminatorias
+                    $this->knockoutBracket($league->id, $teamIds, $start, $simulateFull);
+                    $this->command->info("Calendario de copa generado desde {$start->format('Y-m-d H:i')}");
+                } else {
+                    // Genera ida y vuelta; si no simulamos, marcará los partidos como no jugados
+                    $this->roundRobin($league->id, $teamIds, $start, $simulateFull);
+                    $this->command->info("Calendario generado (ida+vuelta) desde {$start->format('Y-m-d H:i')}");
+                }
             }
         }
     }
@@ -85,7 +103,7 @@ class TeamsAndFixturesSeeder extends Seeder
         return Carbon::parse($hint)->setTime($hm[0], $hm[1]);
     }
 
-    private function roundRobin(int $leagueId, array $teamIds, Carbon $start): void
+    private function roundRobin(int $leagueId, array $teamIds, Carbon $start, bool $simulateFull = true): void
     {
         // 1) Limpia anteriores
         DB::table('matches')->where('league_id', $leagueId)->delete();
@@ -100,7 +118,7 @@ class TeamsAndFixturesSeeder extends Seeder
 
         for ($r = 1; $r <= $R; $r++) {
             foreach ($firstLegRounds[$r] as [$home, $away]) {
-                [$status, $hg, $ag] = $this->randomStatusAndScore();
+                [$status, $hg, $ag] = $this->randomStatusAndScore($simulateFull);
                 DB::table('matches')->updateOrInsert(
                     ['league_id'=>$leagueId,'matchday_number'=>$r,'home_team_id'=>$home,'away_team_id'=>$away],
                     [
@@ -133,7 +151,7 @@ class TeamsAndFixturesSeeder extends Seeder
         ksort($secondLegRounds);
         foreach ($secondLegRounds as $absRound => $pairs) {
             foreach ($pairs as [$home, $away]) {
-                [$status, $hg, $ag] = $this->randomStatusAndScore();
+                [$status, $hg, $ag] = $this->randomStatusAndScore($simulateFull);
                 DB::table('matches')->updateOrInsert(
                     ['league_id'=>$leagueId,'matchday_number'=>$absRound,'home_team_id'=>$home,'away_team_id'=>$away],
                     [
@@ -330,12 +348,96 @@ class TeamsAndFixturesSeeder extends Seeder
         }
     }
 
-    private function randomStatusAndScore(): array
+    private function randomStatusAndScore(bool $simulateFull = true): array
     {
-        $pool   = ['scheduled','scheduled','scheduled','played','postponed'];
-        $status = $pool[array_rand($pool)];
-        $hg = $status === 'played' ? rand(0,4) : null;
-        $ag = $status === 'played' ? rand(0,4) : null;
-        return [$status, $hg, $ag];
+        // Si no simulamos resultados completos, programamos el partido sin marcar goles
+        if (!$simulateFull) {
+            return ['scheduled', null, null];
+        }
+        // En simulación completa marcamos todos los partidos como jugados con marcador aleatorio
+        $hg = rand(0, 4);
+        $ag = rand(0, 4);
+        return ['played', $hg, $ag];
+    }
+
+    /**
+     * Genera un cuadro de eliminatorias simple para competiciones de copa.
+     * Crea enfrentamientos a partido único. Si el número de equipos no es potencia de 2,
+     * algunos equipos pasarán a la siguiente ronda con bye. El número de jornadas irá
+     * aumentando a medida que avanza el torneo. Si $simulateFull es falso, los partidos
+     * se programan sin resultado y se asume el equipo local como vencedor provisional
+     * para avanzar en el cuadro.
+     *
+     * @param int    $leagueId     ID de la liga
+     * @param array  $teamIds      Lista de IDs de equipos participantes
+     * @param Carbon $start        Fecha y hora inicial del primer partido
+     * @param bool   $simulateFull Determina si se simula el resultado completo o se deja programado
+     */
+    private function knockoutBracket(int $leagueId, array $teamIds, Carbon $start, bool $simulateFull = true): void
+    {
+        // Limpiar cualquier partido existente de la liga
+        DB::table('matches')->where('league_id', $leagueId)->delete();
+
+        $now        = now();
+        $date       = $start->copy();
+        $roundTeams = array_values($teamIds);
+        $matchday   = 1;
+
+        // Continúa creando rondas hasta que haya un único vencedor
+        while (count($roundTeams) > 1) {
+            $nextRound = [];
+
+            // Empareja de dos en dos; si un equipo queda suelto, pasa de ronda (bye)
+            $n = count($roundTeams);
+            for ($i = 0; $i < $n; $i += 2) {
+                $home = $roundTeams[$i];
+                $away = $roundTeams[$i + 1] ?? null;
+
+                if ($away === null) {
+                    // Bye: el equipo pasa automáticamente a la siguiente ronda
+                    $nextRound[] = $home;
+                    continue;
+                }
+
+                // Determinar estado y resultado
+                [$status, $hg, $ag] = $this->randomStatusAndScore($simulateFull);
+
+                // Insertar partido
+                DB::table('matches')->insert([
+                    'league_id'        => $leagueId,
+                    'matchday_number'  => $matchday,
+                    'home_team_id'     => $home,
+                    'away_team_id'     => $away,
+                    'scheduled_at'     => $date->format('Y-m-d H:i:s'),
+                    'status'           => $status,
+                    'home_goals'       => $hg,
+                    'away_goals'       => $ag,
+                    'venue_id'         => null,
+                    'created_at'       => $now,
+                    'updated_at'       => $now,
+                ]);
+
+                // Seleccionar ganador provisional para avanzar a la siguiente ronda
+                if ($simulateFull) {
+                    if ($hg > $ag) {
+                        $winner = $home;
+                    } elseif ($ag > $hg) {
+                        $winner = $away;
+                    } else {
+                        // En caso de empate aleatorio, elige uno al azar
+                        $winner = (rand(0, 1) === 0) ? $home : $away;
+                    }
+                } else {
+                    // Si no se simula, el local avanza provisionalmente
+                    $winner = $home;
+                }
+                $nextRound[] = $winner;
+                $matchday++;
+            }
+
+            // Avanzar a la siguiente jornada una semana después
+            $date = $date->copy()->addWeek();
+            $roundTeams = $nextRound;
+        }
     }
 }
