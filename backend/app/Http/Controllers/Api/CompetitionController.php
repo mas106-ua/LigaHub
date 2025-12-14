@@ -21,6 +21,7 @@ class CompetitionController extends Controller
         $gender   = (string) $request->query('gender', '');
         $level    = (string) $request->query('level', '');
         $province = (string) $request->query('province', '');
+        $category = (string) $request->query('category', '');
 
         // Base: ligas oficiales y públicas, enlazadas a una Competition
         $query = League::query()
@@ -36,32 +37,37 @@ class CompetitionController extends Controller
             ->public()
             ->whereNotNull('competition_id');
 
-        // Filtro por CCAA usando competition.region
+        // Filtro por CCAA: incluye competiciones con region_id nulo (nacionales),
+        // como Tercera FUTFEM antiguas, además de las que pertenecen a la región.
         if ($region !== '') {
-            $query->whereHas('competition.region', function ($q) use ($region) {
-                $q->where('code', $region);
+            $query->where(function ($q) use ($region) {
+                $q->whereHas('competition.region', function ($rc) use ($region) {
+                    $rc->where('code', $region);
+                })
+                ->orWhereHas('competition', function ($cq) {
+                    $cq->whereNull('region_id');
+                });
             });
         }
 
-        // Filtro por provincia:
-        // - competiciones con esa provincia concreta
-        // - o competiciones sin provincia pero de la misma región
+        // Filtro por provincia (cuando eliges provincia => SOLO esa provincia)
         if ($province !== '') {
             $prov = Province::where('code', $province)->first();
 
             if ($prov) {
                 $query->where(function ($q) use ($prov) {
+                    // 1) Si algún día guardas province_id en competitions
                     $q->whereHas('competition', function ($cq) use ($prov) {
                         $cq->where('province_id', $prov->id);
-                    })->orWhere(function ($q2) use ($prov) {
-                        $q2->whereHas('competition', function ($cq2) use ($prov) {
-                            $cq2->whereNull('province_id')
-                                ->where('region_id', $prov->region_id);
-                        });
-                    });
+                    })
+                    // 2) Para tu seeder actual: las provinciales vienen en group_name = "Málaga"
+                    ->orWhere('leagues.group_name', 'like', '%'.$prov->name.'%')
+                    // 3) Extra por seguridad (por si group_name viniera null)
+                    ->orWhere('leagues.name', 'like', '%– '.$prov->name);
                 });
             }
         }
+
 
         // Filtro por temporada (Season)
         if ($season !== '') {
@@ -85,6 +91,12 @@ class CompetitionController extends Controller
                 if ($level !== '') {
                     $q->where('level', $level);
                 }
+            });
+        }
+
+        if ($category !== '') {
+            $query->whereHas('competition.category', function ($q) use ($category) {
+                $q->where('name', 'like', $category.'%');
             });
         }
 

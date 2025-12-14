@@ -32,9 +32,10 @@ export default function CompetitionsPage() {
     const gender   = searchParams.get("gender")   || "";
     const level    = searchParams.get("level")    || "";    // "amateur" | "semi"
     const province = searchParams.get("province") || "";
+    const category = searchParams.get("category") || "";
     const page     = parseInt(searchParams.get("page") || "1", 10);
     const per_page = parseInt(searchParams.get("per_page") || DEFAULT_PER_PAGE, 10);
-    return { region, season, search, gender, level, province, page, per_page };
+    return { region, season, search, gender, level, province, category, page, per_page };
   }, [searchParams]);
 
   // Helper para actualizar URL
@@ -44,7 +45,8 @@ export default function CompetitionsPage() {
       (partial.season   ?? qp.season)   !== qp.season   ||
       (partial.search   ?? qp.search)   !== qp.search   ||
       (partial.gender   ?? qp.gender)   !== qp.gender   ||
-      (partial.province ?? qp.province) !== qp.province;
+      (partial.province ?? qp.province) !== qp.province ||
+      (partial.category ?? qp.category) !== qp.category;
 
     const next = {
       ...qp,
@@ -59,6 +61,7 @@ export default function CompetitionsPage() {
     if (next.search)   params.set("search", next.search);
     if (next.gender)   params.set("gender", next.gender);
     if (next.province) params.set("province", next.province);
+    if (next.category) params.set("category", next.category);
     params.set("page", String(next.page || 1));
     params.set("per_page", String(next.per_page || DEFAULT_PER_PAGE));
 
@@ -133,6 +136,7 @@ export default function CompetitionsPage() {
         search:   qp.search  || undefined,
         gender:   qp.gender  || undefined,
         province: qp.province|| undefined,
+        category: qp.category|| undefined,
         page:     qp.page    || 1,
         per_page: qp.per_page|| DEFAULT_PER_PAGE,
       },
@@ -151,7 +155,7 @@ export default function CompetitionsPage() {
     .finally(() => setLoading(false));
 
     return () => source.cancel("route-change");
-  }, [qp.region, qp.season, qp.search, qp.gender, qp.level, qp.province, qp.page, qp.per_page]);
+  }, [qp.region, qp.season, qp.search, qp.gender, qp.level, qp.province, qp.category, qp.page, qp.per_page]);
 
   const handleFilterChange = (next) => setParams(next);
   const handlePageChange   = (p)   => setParams({ page: p });

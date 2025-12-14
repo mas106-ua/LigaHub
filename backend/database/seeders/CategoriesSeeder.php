@@ -18,8 +18,14 @@ class CategoriesSeeder extends Seeder
             ['name' => 'Senior', 'level' => 'pro',     'gender' => 'female'],
             ['name' => 'Senior', 'level' => 'semi',    'gender' => 'female'],
             ['name' => 'Senior', 'level' => 'amateur', 'gender' => 'female'],
-            // Juvenil nacional masculino
+            // Juvenil nacional masculino (División de Honor y Liga Nacional)
             ['name' => 'Juvenil Nacional', 'level' => 'amateur', 'gender' => 'male'],
+
+            // Juvenil territorial masculino (máxima autonómica)
+            ['name' => 'Juvenil', 'level' => 'amateur', 'gender' => 'male'],
+
+            // Juvenil femenino (torneos y ligas territoriales sub‑19/sub‑18)
+            ['name' => 'Juvenil', 'level' => 'amateur', 'gender' => 'female'],
         ];
 
         foreach ($cats as $c) {
