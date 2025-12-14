@@ -48,4 +48,10 @@ class League extends Model
             ->withPivot('role_in_league', 'joined_at')
             ->wherePivotIn('role_in_league', ['owner', 'admin']);
     }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'league_teams')
+            ->withPivot(['group_name']);
+    }
 }

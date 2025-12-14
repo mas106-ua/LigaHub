@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\PublicLeagueDetailController;
 use App\Http\Controllers\Api\AdminMatchReportController;
 use App\Http\Controllers\Api\PublicMatchReportController;
 use App\Http\Controllers\Api\SeasonController;
+use App\Http\Controllers\Api\AdminCompetitionController;
 
 Route::get('/ping', fn() => ['pong' => now()]);
 
@@ -102,4 +103,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/admin/matches/{match}/report', [\App\Http\Controllers\Api\AdminMatchReportController::class, 'upload']);
     Route::delete('/admin/matches/{match}/report', [\App\Http\Controllers\Api\AdminMatchReportController::class, 'destroy']);
+
+    Route::prefix('admin')->middleware('role:superadmin,admin')->group(function () {
+        Route::get('/competitions', [AdminCompetitionController::class, 'index']);
+        Route::get('/competitions/{competition}/leagues', [AdminCompetitionController::class, 'leagues']);
+    });
 });
