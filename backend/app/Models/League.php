@@ -13,7 +13,7 @@ class League extends Model
     protected $table = 'leagues';
 
     protected $fillable = [
-        'name', 'type', 'region_id', 'category_id', 'season_id',
+        'name', 'type', 'region_id', 'province_id', 'category_id', 'season_id',
         'visibility', 'access_uuid', 'owner_user_id', 'is_active',
         'competition_id', 'group_name',
     ];
