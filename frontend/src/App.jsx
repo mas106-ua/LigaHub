@@ -25,6 +25,8 @@ import StandingsPage from "./pages/standings/StandingsPage";
 import LeagueStatsPage from "./pages/LeagueStatsPage";
 import LeagueDetailPage from "./pages/LeagueDetailPage";
 import LeagueTeamsPage from "./pages/LeagueTeamsPage";
+import AdminOfficialCompetitionsPage from "./pages/admin/AdminOfficialCompetitionsPage";
+import AdminLeagueDashboardPage from "./pages/admin/AdminLeagueDashboardPage";
 
 
 export default function App() {
@@ -95,6 +97,24 @@ export default function App() {
               {/* más privadas aquí */}
               <Route path="profile" element={<ProfileView />} />
               <Route path="profile/edit" element={<ProfileEdit />} />
+
+              <Route
+                path="admin/competitions"
+                element={
+                  <RequireRole roles={["admin", "superadmin"]}>
+                    <AdminOfficialCompetitionsPage />
+                  </RequireRole>
+                }
+              />
+
+              <Route
+                path="admin/ligas/:leagueId"
+                element={
+                  <RequireRole roles={["admin", "superadmin"]}>
+                    <AdminLeagueDashboardPage />
+                  </RequireRole>
+                }
+              />
             </Route>
 
             {/* opcional: 404 */}
