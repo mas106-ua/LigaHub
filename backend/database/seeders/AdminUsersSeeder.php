@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\League;
 use App\Models\Region;
+use App\Models\Competition;
 use App\Models\LeagueMembership;
 use App\Models\CompetitionAdminScope;
 use Illuminate\Database\Seeder;
@@ -18,58 +19,91 @@ class AdminUsersSeeder extends Seeder
         $password = Hash::make('admin1234');
 
         /*
-         * 1) Admins profesionales por liga concreta
-         *    (se crean como admin global + admin de esa liga vía league_memberships)
+         * 1) Admins profesionales por COMPETICIÓN (no por league suelta)
+         *    - Se crean como role=admin (para poder entrar al panel)
+         *    - Y se les da membership de admin en TODAS las leagues (todas las temporadas)
+         *      que cuelgan de esa competition_id.
+         *
+         * Ventaja:
+         * - Si siembras 2021/22..2025/26, el admin puede gestionar todas las ediciones.
          */
-        $professionalAdmins = [
-            'LaLiga EA SPORTS' => [
-                'name'  => 'Admin LaLiga EA Sports',
-                'email' => 'admin.laliga@tfg.local',
+        $competitionAdmins = [
+            [
+                'competition_code' => 'laliga-ea-sports',
+                'fallback_name'    => 'LaLiga EA SPORTS',
+                'user' => [
+                    'name'  => 'Admin LaLiga EA Sports',
+                    'email' => 'admin.laliga@tfg.local',
+                ],
             ],
-            'Liga F' => [
-                'name'  => 'Admin Liga F',
-                'email' => 'admin.ligaf@tfg.local',
+            [
+                'competition_code' => 'liga-f',
+                'fallback_name'    => 'Liga F',
+                'user' => [
+                    'name'  => 'Admin Liga F',
+                    'email' => 'admin.ligaf@tfg.local',
+                ],
             ],
-            'LaLiga Hypermotion' => [
-                'name'  => 'Admin LaLiga Hypermotion',
-                'email' => 'admin.hypermotion@tfg.local',
+            [
+                'competition_code' => 'laliga-hypermotion',
+                'fallback_name'    => 'LaLiga Hypermotion',
+                'user' => [
+                    'name'  => 'Admin LaLiga Hypermotion',
+                    'email' => 'admin.hypermotion@tfg.local',
+                ],
             ],
         ];
 
-        foreach ($professionalAdmins as $leagueName => $userData) {
-            $leagues = League::where('name', $leagueName)->get();
+        foreach ($competitionAdmins as $cfg) {
+            $competition = Competition::query()
+                ->where('code', $cfg['competition_code'])
+                ->orWhere('name', $cfg['fallback_name'])
+                ->first();
+
+            if (!$competition) {
+                $this->command?->warn("Competition no encontrada: {$cfg['competition_code']} / {$cfg['fallback_name']}");
+                continue;
+            }
+
+            $user = User::updateOrCreate(
+                ['email' => $cfg['user']['email']],
+                [
+                    'name'     => $cfg['user']['name'],
+                    'password' => $password,
+                    'role'     => 'admin',
+                ]
+            );
+
+            // Todas las leagues (todas las temporadas/grupos) de esa competición
+            $leagues = League::query()
+                ->where('competition_id', $competition->id)
+                ->where('type', 'official')
+                ->get(['id']);
 
             if ($leagues->isEmpty()) {
-                $this->command?->warn("Liga '{$leagueName}' no encontrada, se omite ese admin.");
-            } else {
-                $user = User::updateOrCreate(
-                    ['email' => $userData['email']],
+                $this->command?->warn("No hay leagues oficiales para competition '{$competition->name}' (id={$competition->id}).");
+                continue;
+            }
+
+            foreach ($leagues as $league) {
+                LeagueMembership::updateOrCreate(
                     [
-                        'name'     => $userData['name'],
-                        'password' => $password,
-                        'role'     => 'admin',
+                        'league_id' => $league->id,
+                        'user_id'   => $user->id,
+                    ],
+                    [
+                        'role_in_league' => 'admin',
+                        'joined_at'      => now(),
                     ]
                 );
-
-                foreach ($leagues as $league) {
-                    LeagueMembership::updateOrCreate(
-                        [
-                            'league_id' => $league->id,
-                            'user_id'   => $user->id,
-                        ],
-                        [
-                            'role_in_league' => 'admin',
-                            'joined_at'      => now(),
-                        ]
-                    );
-                }
             }
+
+            $this->command?->info("OK: {$user->email} => admin en {$leagues->count()} leagues de '{$competition->name}'.");
         }
 
         /*
-         * 2) Admin de fútbol semiprofesional (level = 'semi')
+         * 2) Admin de fútbol semiprofesional (scope level = 'semi', todas las CCAA)
          */
-
         $semiGlobal = User::updateOrCreate(
             ['email' => 'admin.semi.global@tfg.local'],
             [
@@ -83,17 +117,15 @@ class AdminUsersSeeder extends Seeder
             [
                 'user_id'   => $semiGlobal->id,
                 'level'     => 'semi',
-                'region_id' => null,   // todas las CCAA
+                'region_id' => null,
             ],
             []
         );
 
-
         /*
-         * 3) Un admin amateur por cada CCAA (level = 'amateur')
+         * 3) Un admin amateur por cada CCAA (scope level = 'amateur' + region_id)
          */
-
-        Region::all()->each(function (Region $region) use ($password) {
+        Region::query()->get()->each(function (Region $region) use ($password) {
             $email = sprintf('admin.amateur.%s@tfg.local', strtolower($region->code));
             $name  = sprintf('Admin Amateur %s', $region->name);
 
