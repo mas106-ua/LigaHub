@@ -8,6 +8,12 @@ const GENDER_OPTS = [
   { value: "female", label: "Femenino" },
 ];
 
+const CATEGORY_OPTS = [
+  { value: "",        label: "Todas" },
+  { value: "Senior",  label: "Senior" },
+  { value: "Juvenil", label: "Juvenil" },
+];
+
 export default function FiltersBar({ mode = "", regions, seasonOptions, initial, onChange }) {
   const isAmateur = mode === "amateur";
 
@@ -16,6 +22,7 @@ export default function FiltersBar({ mode = "", regions, seasonOptions, initial,
   const [search,   setSearch]   = useState(initial.search   ?? "");
   const [gender,   setGender]   = useState(initial.gender   ?? "");
   const [province, setProvince] = useState(initial.province ?? "");
+  const [category, setCategory] = useState(initial.category ?? "");
 
   const [provOpts, setProvOpts] = useState([]);   // [{id, name, code}]
   const [hideProv, setHideProv] = useState(true); // ocultar select si 0/1 provincias
@@ -70,9 +77,10 @@ export default function FiltersBar({ mode = "", regions, seasonOptions, initial,
       search:   debouncedSearch,
       gender,
       province: isAmateur ? province : "",
+      category,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [region, season, debouncedSearch, gender, province, isAmateur]);
+  }, [region, season, debouncedSearch, gender, province, isAmateur, category, onChange]);
 
   // Al cambiar de CCAA, resetea provincia
   const handleRegionChange = (val) => {
@@ -148,6 +156,20 @@ export default function FiltersBar({ mode = "", regions, seasonOptions, initial,
             <label className="form-label">Género</label>
             <select className="form-select" value={gender} onChange={(e)=>setGender(e.target.value)}>
               {GENDER_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+
+          {/* Nuevo select de Categoría */}
+          <div className="col-12 col-md-6">
+            <label className="form-label">Categoría</label>
+            <select
+              className="form-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {CATEGORY_OPTS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
             </select>
           </div>
         </div>

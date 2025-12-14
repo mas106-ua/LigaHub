@@ -58,6 +58,9 @@ export default function AppLayout() {
               </Link>
 
               {/* Listados prefiltrados con el nivel bloqueado */}
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro&lock_level=1">
+                FÚTBOL PROFESIONAL
+              </Link>
               <Link className="text-white-50 text-decoration-none" to="/ligas?level=semi&lock_level=1">
                 FÚTBOL SEMIPROFESIONAL
               </Link>
