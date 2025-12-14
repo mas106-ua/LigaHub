@@ -10,6 +10,7 @@ use App\Models\Competition;
 use App\Models\League;
 use App\Models\Province;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class AdminCompetitionController extends Controller
 {
@@ -19,6 +20,8 @@ class AdminCompetitionController extends Controller
      */
     public function index(AdminCompetitionIndexRequest $request): JsonResponse
     {
+        $user = $request->user();
+
         $search   = (string) $request->query('search', '');
         $level    = (string) $request->query('level', '');
         $gender   = (string) $request->query('gender', '');
@@ -38,6 +41,56 @@ class AdminCompetitionController extends Controller
                 'leagues as leagues_count' => fn ($qq) => $qq->official(),
             ]);
 
+        // Aplicar permisos si NO es superadmin
+        if (($user?->role ?? null) !== 'superadmin') {
+            // 1) ids de competitions donde el usuario es admin/owner de alguna league
+            $managedCompetitionIds = DB::table('leagues as l')
+                ->whereNotNull('l.competition_id')
+                ->where(function ($w) use ($user) {
+                    $w->where('l.owner_user_id', $user->id)
+                      ->orWhereExists(function ($sq) use ($user) {
+                          $sq->select(DB::raw(1))
+                              ->from('league_memberships as lm')
+                              ->whereColumn('lm.league_id', 'l.id')
+                              ->where('lm.user_id', $user->id)
+                              ->whereIn('lm.role_in_league', ['owner', 'admin']);
+                      });
+                })
+                ->select('l.competition_id');
+
+            // 2) scopes del usuario (level/region)
+            $scopes = DB::table('competition_admin_scopes')
+                ->where('user_id', $user->id)
+                ->get(['level', 'region_id']);
+
+            $hasGlobalScope = $scopes->contains(fn ($s) => $s->level === null && $s->region_id === null);
+
+            // Si no tiene scope global, restringe a (managed OR scopes)
+            if (!$hasGlobalScope) {
+                $q->where(function ($outer) use ($managedCompetitionIds, $scopes) {
+                    // a) competiciones por membership/owner
+                    $outer->whereIn('competitions.id', $managedCompetitionIds);
+
+                    // b) competiciones por scope
+                    if ($scopes->isNotEmpty()) {
+                        $outer->orWhere(function ($or) use ($scopes) {
+                            foreach ($scopes as $s) {
+                                $or->orWhere(function ($w) use ($s) {
+                                    if ($s->level !== null) {
+                                        $w->where('competitions.level', $s->level);
+                                    }
+                                    if ($s->region_id !== null) {
+                                        $w->where('competitions.region_id', $s->region_id);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // ===== Filtros (los tuyos)
         if ($search !== '') {
             $like = '%' . str_replace('%', '\%', $search) . '%';
             $q->where(function ($w) use ($like) {
@@ -71,7 +124,6 @@ class AdminCompetitionController extends Controller
             if ($prov) {
                 $q->where('competitions.province_id', $prov->id);
             } else {
-                // si viene un code inválido, devolvemos vacío (sin 422 para no romper FE)
                 $q->whereRaw('1=0');
             }
         }
@@ -93,6 +145,9 @@ class AdminCompetitionController extends Controller
     /**
      * GET /api/admin/competitions/{competition}/leagues
      * Lista ediciones (leagues) de una Competition (temporadas/grupos).
+     *
+     * Recomendado: proteger esta ruta con middleware competition_scope
+     * (o policy) para comprobar canManageCompetition.
      */
     public function leagues(Competition $competition): JsonResponse
     {
@@ -101,7 +156,6 @@ class AdminCompetitionController extends Controller
             abort(404);
         }
 
-        // Join a seasons para ordenar + devolver season_code sin N+1
         $rows = League::query()
             ->where('competition_id', $competition->id)
             ->official()
