@@ -120,6 +120,52 @@ class User extends Authenticatable
             ->exists();
     }
 
+    public function canManageCompetition(Competition $competition): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->role !== 'admin') {
+            return false;
+        }
+
+        // b) Admin/owner de alguna League de esa Competition
+        $hasLeagueAccess = DB::table('leagues as l')
+            ->where('l.competition_id', $competition->id)
+            ->where(function ($q) {
+                $q->where('l.owner_user_id', $this->id)
+                  ->orWhereExists(function ($sq) {
+                      $sq->select(DB::raw(1))
+                          ->from('league_memberships as lm')
+                          ->whereColumn('lm.league_id', 'l.id')
+                          ->where('lm.user_id', $this->id)
+                          ->whereIn('lm.role_in_league', ['owner', 'admin']);
+                  });
+            })
+            ->exists();
+
+        if ($hasLeagueAccess) {
+            return true;
+        }
+
+        // a) Scopes por level + region
+        return $this->competitionAdminScopes()
+            ->where(function ($q) use ($competition) {
+                $q->whereNull('level');
+                if ($competition->level) {
+                    $q->orWhere('level', $competition->level);
+                }
+            })
+            ->where(function ($q) use ($competition) {
+                $q->whereNull('region_id');
+                if ($competition->region_id) {
+                    $q->orWhere('region_id', $competition->region_id);
+                }
+            })
+            ->exists();
+    }
+
     public function canManageMatch(MatchModel $match): bool
     {
         // 1) Superadmin global

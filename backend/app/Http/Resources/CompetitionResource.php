@@ -8,21 +8,32 @@ class CompetitionResource extends JsonResource
 {
     public function toArray($request): array
     {
+        // League -> Competition (nuevo modelo)
+        $competition   = $this->competition ?? null;
+
+        // Preferimos datos de Competition; si no hay, usamos los de League (compatibilidad)
+        $regionModel   = $competition?->region   ?? $this->region;
+        $categoryModel = $competition?->category ?? $this->category;
+        $seasonModel   = $this->season; // siempre viene de League
+
         return [
             'id'   => $this->id,
             'name' => $this->name,
-            'region' => $this->whenLoaded('region', fn () => [
-                'name' => $this->region?->name,
-                'code' => $this->region?->code,
-            ]),
-            'season' => $this->whenLoaded('season', fn () => [
-                'code' => $this->season?->code,
-            ]),
-            'category' => $this->whenLoaded('category', fn () => [
-                'name'   => $this->category?->name,
-                'level'  => $this->category?->level,
-                'gender' => $this->category?->gender,
-            ]),
+
+            'region' => $regionModel ? [
+                'name' => $regionModel->name,
+                'code' => $regionModel->code,
+            ] : null,
+
+            'season' => $seasonModel ? [
+                'code' => $seasonModel->code,
+            ] : null,
+
+            'category' => $categoryModel ? [
+                'name'   => $categoryModel->name,
+                'level'  => $categoryModel->level,
+                'gender' => $categoryModel->gender,
+            ] : null,
         ];
     }
 }

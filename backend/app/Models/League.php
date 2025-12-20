@@ -13,8 +13,9 @@ class League extends Model
     protected $table = 'leagues';
 
     protected $fillable = [
-        'name', 'type', 'region_id', 'category_id', 'season_id',
+        'name', 'type', 'region_id', 'province_id', 'category_id', 'season_id',
         'visibility', 'access_uuid', 'owner_user_id', 'is_active',
+        'competition_id', 'group_name',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class League extends Model
     public function season(){ return $this->belongsTo(Season::class); }
     public function category(){ return $this->belongsTo(Category::class); }
     public function province(){ return $this->belongsTo(Province::class); }
+    public function competition() { return $this->belongsTo(Competition::class); }
 
 
     // Scopes útiles
@@ -45,5 +47,11 @@ class League extends Model
         return $this->belongsToMany(User::class, 'league_memberships')
             ->withPivot('role_in_league', 'joined_at')
             ->wherePivotIn('role_in_league', ['owner', 'admin']);
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'league_teams')
+            ->withPivot(['group_name']);
     }
 }

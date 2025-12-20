@@ -46,18 +46,10 @@ export default function AppLayout() {
 
             {/* Accesos directos públicos */}
             <nav className="d-flex gap-3">
-              {/* Profesionales (de momento abren /ligas con level=pro) */}
-              <Link className="text-white-50 text-decoration-none" to="/comp/213">
-                LALIGA
-              </Link>
-              <Link className="text-white-50 text-decoration-none" to="/comp/240">
-                LIGA F
-              </Link>
-              <Link className="text-white-50 text-decoration-none" to="/comp/214">
-                LIGA HYPERMOTION
-              </Link>
-
               {/* Listados prefiltrados con el nivel bloqueado */}
+              <Link className="text-white-50 text-decoration-none" to="/ligas?level=pro&lock_level=1">
+                FÚTBOL PROFESIONAL
+              </Link>
               <Link className="text-white-50 text-decoration-none" to="/ligas?level=semi&lock_level=1">
                 FÚTBOL SEMIPROFESIONAL
               </Link>
@@ -66,9 +58,9 @@ export default function AppLayout() {
               </Link>
 
               {/* Solo admins: Dashboard (no mostramos Home para invitados) */}
-              {!loading && user?.role === "superadmin" && (
-                <Link className="text-white-50 text-decoration-none" to="/dashboard">
-                  Dashboard
+              {!loading && (user?.role === "admin" || user?.role === "superadmin") && (
+                <Link className="text-white-50 text-decoration-none" to="/admin/competitions">
+                  DASHBOARD
                 </Link>
               )}
             </nav>

@@ -14,55 +14,94 @@ class CompetitionController extends Controller
 {
     public function index(CompetitionIndexRequest $request): JsonResponse
     {
-        $region  = (string) $request->query('region', '');
-        $season  = (string) $request->query('season', '');
-        $search  = (string) $request->query('search', '');
-        $perPage = (int) $request->query('per_page', 12);
-        $gender  = (string) $request->query('gender', ''); 
-        $level   = (string) $request->query('level', '');  
+        $region   = (string) $request->query('region', '');
+        $season   = (string) $request->query('season', '');
+        $search   = (string) $request->query('search', '');
+        $perPage  = (int) $request->query('per_page', 12);
+        $gender   = (string) $request->query('gender', '');
+        $level    = (string) $request->query('level', '');
         $province = (string) $request->query('province', '');
+        $category = (string) $request->query('category', '');
 
+        // Base: ligas oficiales y públicas, enlazadas a una Competition
         $query = League::query()
             ->select('leagues.*')
-            ->with(['region:id,name,code', 'season:id,code,start_date', 'category:id,name,level,gender', 'province:id,name,code,region_id',])
+            ->with([
+                'competition.region:id,name,code',
+                'competition.category:id,name,level,gender',
+                'competition.province:id,name,code,region_id',
+                'season:id,code,start_date',
+            ])
             ->leftJoin('seasons', 'seasons.id', '=', 'leagues.season_id')
             ->official()
-            ->public();
+            ->public()
+            ->whereNotNull('competition_id');
 
+        // Filtro por CCAA: incluye competiciones con region_id nulo (nacionales),
+        // como Tercera FUTFEM antiguas, además de las que pertenecen a la región.
         if ($region !== '') {
-            $query->whereHas('region', fn ($q) => $q->where('code', $region));
+            $query->where(function ($q) use ($region) {
+                $q->whereHas('competition.region', function ($rc) use ($region) {
+                    $rc->where('code', $region);
+                })
+                ->orWhereHas('competition', function ($cq) {
+                    $cq->whereNull('region_id');
+                });
+            });
         }
 
+        // Filtro por provincia (cuando eliges provincia => SOLO esa provincia)
         if ($province !== '') {
             $prov = Province::where('code', $province)->first();
 
             if ($prov) {
                 $query->where(function ($q) use ($prov) {
-                    $q->where('leagues.province_id', $prov->id)
-                    ->orWhere(function ($q2) use ($prov) {
-                        $q2->whereNull('leagues.province_id')
-                            ->where('leagues.region_id', $prov->region_id);
-                    });
+                    // 1) Si algún día guardas province_id en competitions
+                    $q->whereHas('competition', function ($cq) use ($prov) {
+                        $cq->where('province_id', $prov->id);
+                    })
+                    // 2) Para tu seeder actual: las provinciales vienen en group_name = "Málaga"
+                    ->orWhere('leagues.group_name', 'like', '%'.$prov->name.'%')
+                    // 3) Extra por seguridad (por si group_name viniera null)
+                    ->orWhere('leagues.name', 'like', '%– '.$prov->name);
                 });
             }
         }
 
+
+        // Filtro por temporada (Season)
         if ($season !== '') {
-            $query->whereHas('season', fn ($q) => $q->where('code', $season));
-        }
-
-        if ($search !== '') {
-            $query->where('leagues.name', 'like', '%'.str_replace('%','\%',$search).'%');
-        }
-
-        if ($gender !== '' || $level !== '') {
-            $query->whereHas('category', function ($q) use ($gender, $level) {
-                if ($gender !== '') $q->where('gender', $gender);
-                if ($level  !== '') $q->where('level',  $level);
+            $query->whereHas('season', function ($q) use ($season) {
+                $q->where('code', $season);
             });
         }
 
-        $query->orderByDesc('seasons.start_date')->orderBy('leagues.name');
+        // Búsqueda por nombre de liga (edición concreta)
+        if ($search !== '') {
+            $like = '%' . str_replace('%', '\%', $search) . '%';
+            $query->where('leagues.name', 'like', $like);
+        }
+
+        // Filtro por género y/o nivel, vía Competition->Category
+        if ($gender !== '' || $level !== '') {
+            $query->whereHas('competition.category', function ($q) use ($gender, $level) {
+                if ($gender !== '') {
+                    $q->where('gender', $gender);
+                }
+                if ($level !== '') {
+                    $q->where('level', $level);
+                }
+            });
+        }
+
+        if ($category !== '') {
+            $query->whereHas('competition.category', function ($q) use ($category) {
+                $q->where('name', 'like', $category.'%');
+            });
+        }
+
+        $query->orderByDesc('seasons.start_date')
+            ->orderBy('leagues.name');
 
         $paginator = $query->paginate($perPage)->appends($request->query());
 
@@ -151,5 +190,67 @@ class CompetitionController extends Controller
             ->get(['id','name']);
 
         return response()->json(['data' => $siblings]);
+    }
+
+    public function versions(League $league): JsonResponse
+    {
+        // Cargar competition + season de la liga actual
+        $league->loadMissing(['competition', 'season']);
+
+        $competition = $league->competition;
+
+        // Si NO tiene competition_id (ligas privadas/antiguas):
+        // devolvemos solo esa liga como única versión
+        if (!$competition) {
+            return response()->json([
+                'competition' => null,
+                'versions' => [[
+                    'league_id'   => $league->id,
+                    'season_id'   => $league->season?->id,
+                    'season_code' => $league->season?->code,
+                    'group_name'  => $league->group_name,
+                    'is_current'  => true,
+                ]],
+            ]);
+        }
+
+        $groupName = $league->group_name;
+
+        // Buscar TODAS las leagues de la MISMA competición
+        // y del MISMO grupo (si group_name no es null)
+        $rows = League::query()
+            ->where('competition_id', $competition->id)
+            ->when($groupName !== null, function ($q) use ($groupName) {
+                $q->where('group_name', $groupName);
+            }, function ($q) {
+                $q->whereNull('group_name');
+            })
+            ->leftJoin('seasons', 'seasons.id', '=', 'leagues.season_id')
+            ->orderByDesc('seasons.start_date')
+            ->get([
+                'leagues.id as league_id',
+                'leagues.group_name',
+                'seasons.id as season_id',
+                'seasons.code as season_code',
+            ]);
+
+        $versions = $rows->map(function ($row) use ($league) {
+            return [
+                'league_id'   => (int) $row->league_id,
+                'season_id'   => $row->season_id,
+                'season_code' => $row->season_code,
+                'group_name'  => $row->group_name,
+                'is_current'  => (int) $row->league_id === (int) $league->id,
+            ];
+        });
+
+        return response()->json([
+            'competition' => [
+                'id'   => $competition->id,
+                'name' => $competition->name,
+                'code' => $competition->code,
+            ],
+            'versions' => $versions,
+        ]);
     }
 }

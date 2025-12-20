@@ -1,19 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchLeagueDetail } from "../api/leagueDetail";
-import LeagueTabs from "./LeagueTabs";
 import LeagueHeader from "../components/league/LeagueHeader";
-
-function getErrorMessage(error) {
-  if (!error) return "Error desconocido";
-  const res = error.response;
-  if (res?.data?.message) return res.data.message;
-  return error.message || "Error de red";
-}
+import LeagueSeasonSwitcher from "../components/league/LeagueSeasonSwitcher";
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
-
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -106,6 +98,7 @@ export default function LeagueDetailPage() {
   return (
     <div className="container py-4">
       <LeagueHeader detail={detail} active="resumen" />
+      <LeagueSeasonSwitcher />
 
       <div className="row">
         {/* Columna izquierda: resumen */}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/api";
 import LeagueHeader from "../components/league/LeagueHeader";
+import LeagueSeasonSwitcher from "../components/league/LeagueSeasonSwitcher";
 
 export default function LeagueTeamsPage() {
   const { leagueId } = useParams();
@@ -30,8 +31,12 @@ export default function LeagueTeamsPage() {
 
   return (
     <div className="container">
-      {/* Cabecera reutilizada, con la pestaña “Equipos” activa */}
-      {detail && <LeagueHeader detail={detail} active="equipos" />}
+      {detail && (
+        <>
+          <LeagueHeader detail={detail} active="equipos" />
+          <LeagueSeasonSwitcher />
+        </>
+      )}
 
       <h1 className="h4 mb-3">Equipos</h1>
 
