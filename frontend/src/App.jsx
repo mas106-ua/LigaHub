@@ -29,6 +29,7 @@ import AdminOfficialCompetitionsPage from "./pages/admin/AdminOfficialCompetitio
 import AdminLeagueDashboardPage from "./pages/admin/AdminLeagueDashboardPage";
 import MyLeaguesPage from "./pages/MyLeaguesPage";
 import MyLeaguesCreatePage from "./pages/MyLeaguesCreatePage";
+import MyLeagueDetailPlaceholderPage from "./pages/MyLeagueDetailPlaceholderPage";
 
 
 export default function App() {
@@ -120,6 +121,7 @@ export default function App() {
 
               <Route path="mis-ligas" element={<MyLeaguesPage />} />
               <Route path="mis-ligas/crear" element={<MyLeaguesCreatePage />} />
+              <Route path="mis-ligas/:leagueId" element={<MyLeagueDetailPlaceholderPage />} />
             </Route>
 
             {/* opcional: 404 */}
