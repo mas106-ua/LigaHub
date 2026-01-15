@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\AdminLeagueStatsController;
 use App\Http\Controllers\Api\AdminMatchReportController;
 
 use App\Http\Controllers\Api\AdminCompetitionController;
+use App\Http\Controllers\Api\PrivateLeaguesController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -86,6 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+
+    // Ligas privadas (usuario autenticado)
+    Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
 
     /*
     |--------------------------------------------------------------------------
