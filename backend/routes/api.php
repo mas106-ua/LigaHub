@@ -60,23 +60,26 @@ Route::get('/seasons', [SeasonController::class, 'index']);
 
 Route::get('/competitions', [CompetitionController::class, 'index']);
 
-Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
+Route::middleware('public_league_guard')->group(function () {
 
-Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
-Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
+    Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
 
-Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
-Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
-Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
-Route::get('/leagues/{league}/versions', [CompetitionController::class, 'versions']);
+    Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
+    Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
 
-Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
-Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
-Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
+    Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
+    Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
+    Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
+    Route::get('/leagues/{league}/versions', [CompetitionController::class, 'versions']);
 
-// Jornadas y partidos
-Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
-Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
+    Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
+    Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
+    Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
+
+    // Jornadas y partidos
+    Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
+    Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -93,7 +96,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
     // Ligas privadas (usuario autenticado)
-    Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
     Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
     Route::get('/my/leagues', [MyLeaguesController::class, 'index']);
     Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
