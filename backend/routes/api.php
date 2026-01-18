@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\PrivateLeaguesController;
 use App\Http\Controllers\Api\MyLeaguesController;
 use App\Http\Controllers\Api\PrivateLeagueDetailController;
 use App\Http\Controllers\Api\PrivateLeagueTeamsController;
+use App\Http\Controllers\Api\PrivateLeaguePlayersController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -97,9 +98,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my/leagues', [MyLeaguesController::class, 'index']);
     Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
     Route::get('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'index']);
+
     Route::post('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'store']);
     Route::put('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'update']);
     Route::delete('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'destroy']);
+    Route::get('/private/leagues/{league}/players', [PrivateLeaguePlayersController::class, 'index']);
+
+    Route::post('/private/leagues/{league}/players', [PrivateLeaguePlayersController::class, 'store']);
+    Route::put('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'update']);
+    Route::delete('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'destroy']);
 
 
     /*
