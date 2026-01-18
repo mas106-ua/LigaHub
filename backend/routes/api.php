@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\AdminMatchReportController;
 use App\Http\Controllers\Api\AdminCompetitionController;
 use App\Http\Controllers\Api\PrivateLeaguesController;
 use App\Http\Controllers\Api\MyLeaguesController;
+use App\Http\Controllers\Api\PrivateLeagueDetailController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -93,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
     Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
     Route::get('/my/leagues', [MyLeaguesController::class, 'index']);
+    Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
 
     /*
     |--------------------------------------------------------------------------
