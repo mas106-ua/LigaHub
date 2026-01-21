@@ -33,6 +33,11 @@ use App\Http\Controllers\Api\AdminLeagueStatsController;
 use App\Http\Controllers\Api\AdminMatchReportController;
 
 use App\Http\Controllers\Api\AdminCompetitionController;
+use App\Http\Controllers\Api\PrivateLeaguesController;
+use App\Http\Controllers\Api\MyLeaguesController;
+use App\Http\Controllers\Api\PrivateLeagueDetailController;
+use App\Http\Controllers\Api\PrivateLeagueTeamsController;
+use App\Http\Controllers\Api\PrivateLeaguePlayersController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -55,23 +60,26 @@ Route::get('/seasons', [SeasonController::class, 'index']);
 
 Route::get('/competitions', [CompetitionController::class, 'index']);
 
-Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
+Route::middleware('public_league_guard')->group(function () {
 
-Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
-Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
+    Route::get('/teams/{team}/players', [TeamPlayersController::class, 'index']);
 
-Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
-Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
-Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
-Route::get('/leagues/{league}/versions', [CompetitionController::class, 'versions']);
+    Route::get('/matches/{match}/report', [PublicMatchReportController::class, 'show']);
+    Route::get('/matches/{match}', [PublicMatchDetailController::class, 'show']);
 
-Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
-Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
-Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
+    Route::get('/leagues/{league}', [CompetitionController::class, 'show']);
+    Route::get('/leagues/{league}/groups', [CompetitionController::class, 'groups']);
+    Route::get('/leagues/{league}/siblings', [CompetitionController::class, 'siblings']);
+    Route::get('/leagues/{league}/versions', [CompetitionController::class, 'versions']);
 
-// Jornadas y partidos
-Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
-Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
+    Route::get('/leagues/{league}/detail', [PublicLeagueDetailController::class, 'show']);
+    Route::get('/leagues/{league}/standings', [PublicStandingsController::class, 'show']);
+    Route::get('/leagues/{league}/stats', [PublicLeagueStatsController::class, 'show']);
+
+    // Jornadas y partidos
+    Route::get('/leagues/{league}/matchdays', [PublicMatchdayController::class, 'index']);
+    Route::get('/leagues/{league}/matchdays/{number}/matches', [PublicMatchController::class, 'byMatchday']);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +94,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+
+    // Ligas privadas (usuario autenticado)
+    Route::post('/private/leagues', [PrivateLeaguesController::class, 'store']);
+    Route::get('/my/leagues', [MyLeaguesController::class, 'index']);
+    Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
+    Route::get('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'index']);
+
+    Route::post('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'store']);
+    Route::put('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'update']);
+    Route::delete('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'destroy']);
+    Route::get('/private/leagues/{league}/players', [PrivateLeaguePlayersController::class, 'index']);
+
+    Route::post('/private/leagues/{league}/players', [PrivateLeaguePlayersController::class, 'store']);
+    Route::put('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'update']);
+    Route::delete('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'destroy']);
+
 
     /*
     |--------------------------------------------------------------------------

@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'competition_scope' => \App\Http\Middleware\EnsureCompetitionScope::class,
+            'public_league_guard' => \App\Http\Middleware\PublicLeagueGuard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

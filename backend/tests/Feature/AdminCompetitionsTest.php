@@ -81,12 +81,21 @@ class AdminCompetitionsTest extends TestCase
 
         $admin = User::factory()->create(['role' => 'admin']);
 
-        $this->actingAs($admin)
+        \DB::table('leagues')->insert([
+            'competition_id' => $competition->id,
+            'owner_user_id'  => $admin->id,
+            'type'           => 'official',
+            'name'           => 'Liga acceso admin',
+            'created_at'     => now(),
+            'updated_at'     => now(),
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
             ->getJson('/api/admin/competitions?level=amateur&search=tercera')
             ->assertOk()
             ->assertJsonStructure(['data', 'meta']);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'sanctum')
             ->getJson('/api/admin/competitions/'.$competition->id.'/leagues')
             ->assertOk()
             ->assertJsonStructure([
@@ -94,4 +103,5 @@ class AdminCompetitionsTest extends TestCase
                 'data',
             ]);
     }
+
 }

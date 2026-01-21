@@ -10,13 +10,11 @@ class LogoutController extends Controller
 {
     public function destroy(Request $request)
     {
-        Auth::guard('web')->logout();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json([
-            'message' => 'Sesión cerrada.',
-        ]);
+        return response()->json(['message' => 'Sesión cerrada.']);
     }
 }
