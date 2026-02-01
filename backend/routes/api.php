@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'destroy']);
 
     Route::post('/private/leagues/{league}/schedule/preview', [PrivateLeagueScheduleController::class, 'preview']);
+    Route::post('/private/leagues/{league}/schedule/publish', [PrivateLeagueScheduleController::class, 'publish']);
 
 
     /*
