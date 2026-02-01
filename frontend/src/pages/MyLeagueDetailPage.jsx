@@ -117,6 +117,12 @@ export default function MyLeagueDetailPage() {
           </div>
 
           <div className="d-flex gap-2 flex-wrap">
+            {canManage && (
+              <Button as={Link} to={`/mis-ligas/${leagueId}/calendario`} variant="success">
+                Calendario
+              </Button>
+            )}
+
             <Button as={Link} to={`/mis-ligas/${leagueId}/equipos`} variant="primary">
               Equipos
             </Button>

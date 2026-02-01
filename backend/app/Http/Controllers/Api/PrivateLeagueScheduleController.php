@@ -222,8 +222,6 @@ class PrivateLeagueScheduleController extends Controller
                         'matchday_number' => $matchdayNumber,
                         'home_team_id' => $homeId,
                         'away_team_id' => $awayId,
-                        'home_score' => null,
-                        'away_score' => null,
                         'status' => 'scheduled',
                         'created_at' => $now,
                         'updated_at' => $now,
