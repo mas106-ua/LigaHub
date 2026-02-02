@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Alert, Badge, Button, Card, Form, Spinner, Table } from "react-bootstrap";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getPrivateLeagueDetail } from "../api/privateLeagueDetail";
 import {
   getPrivateLeagueMatchdays,
@@ -12,6 +12,13 @@ const STATUS_VARIANT = {
   played: "success",
   postponed: "warning",
   canceled: "danger",
+};
+
+const STATUS_LABEL = {
+  scheduled: "scheduled",
+  played: "played",
+  postponed: "postponed",
+  canceled: "canceled",
 };
 
 export default function MyLeagueMatchdaysPage() {
@@ -48,6 +55,9 @@ export default function MyLeagueMatchdaysPage() {
       if (days.length > 0) {
         setSelected(days[0].number);
         loadMatches(days[0].number);
+      } else {
+        setSelected(null);
+        setMatches([]);
       }
     } catch (e) {
       setError("No se pudieron cargar las jornadas de la liga.");
@@ -60,7 +70,7 @@ export default function MyLeagueMatchdaysPage() {
     setLoadingMatches(true);
     try {
       const data = await getPrivateLeagueMatchesByMatchday(leagueId, matchday);
-      setMatches(data);
+      setMatches(data ?? []);
     } catch {
       setMatches([]);
     } finally {
@@ -72,6 +82,11 @@ export default function MyLeagueMatchdaysPage() {
     const md = Number(e.target.value);
     setSelected(md);
     loadMatches(md);
+  };
+
+  const goEdit = () => {
+    if (!selected) return;
+    navigate(`/mis-ligas/${leagueId}/jornadas/${selected}/editar`);
   };
 
   if (loading) {
@@ -96,15 +111,20 @@ export default function MyLeagueMatchdaysPage() {
               <div className="text-muted">Calendario y partidos</div>
             </div>
 
-            <Button variant="secondary" onClick={() => navigate(`/mis-ligas/${leagueId}`)}>
-              Volver
-            </Button>
+            <div className="d-flex gap-2">
+              {canManage && selected && (
+                <Button variant="outline-primary" onClick={goEdit}>
+                  Editar jornada
+                </Button>
+              )}
+              <Button variant="secondary" onClick={() => navigate(`/mis-ligas/${leagueId}`)}>
+                Volver
+              </Button>
+            </div>
           </div>
 
           {matchdays.length === 0 && (
-            <Alert variant="info">
-              El calendario aún no está publicado.
-            </Alert>
+            <Alert variant="info">El calendario aún no está publicado.</Alert>
           )}
 
           {matchdays.length > 0 && (
@@ -130,7 +150,6 @@ export default function MyLeagueMatchdaysPage() {
                       <th className="text-center">Resultado</th>
                       <th>Visitante</th>
                       <th className="text-center">Estado</th>
-                      {canManage && <th></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -139,27 +158,15 @@ export default function MyLeagueMatchdaysPage() {
                         <td>{m.home_team?.name}</td>
                         <td className="text-center">
                           {m.status === "played"
-                            ? `${m.home_goals} - ${m.away_goals}`
+                            ? `${m.score?.home ?? 0} - ${m.score?.away ?? 0}`
                             : "—"}
                         </td>
                         <td>{m.away_team?.name}</td>
                         <td className="text-center">
                           <Badge bg={STATUS_VARIANT[m.status] ?? "secondary"}>
-                            {m.status}
+                            {STATUS_LABEL[m.status] ?? m.status}
                           </Badge>
                         </td>
-                        {canManage && (
-                          <td className="text-end">
-                            <Button
-                              as={Link}
-                              to={`/mis-ligas/${leagueId}/jornadas/${selected}/editar`}
-                              size="sm"
-                              variant="outline-primary"
-                            >
-                              Editar
-                            </Button>
-                          </td>
-                        )}
                       </tr>
                     ))}
                   </tbody>
