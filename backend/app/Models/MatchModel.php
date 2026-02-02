@@ -27,6 +27,7 @@ class MatchModel extends Model
         'away_goals',
         'venue_id',
         'notes',
+        'updated_by',
     ];
 
     protected $casts = [
