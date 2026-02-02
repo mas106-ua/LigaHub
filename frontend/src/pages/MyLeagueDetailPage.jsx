@@ -131,8 +131,8 @@ export default function MyLeagueDetailPage() {
               Jugadores
             </Button>
 
-            <Button as={Link} to={`/mis-ligas/${leagueId}/jornadas`} variant="outline-secondary" disabled>
-              Jornadas (próx.)
+            <Button as={Link} to={`/mis-ligas/${leagueId}/jornadas`} variant="outline-primary">
+              Jornadas
             </Button>
 
             <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary" disabled>
