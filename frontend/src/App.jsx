@@ -36,6 +36,7 @@ import MyLeagueSchedulePage from "./pages/MyLeagueSchedulePage";
 import MyLeagueMatchdaysPage from "./pages/MyLeagueMatchdaysPage";
 import MyLeagueMatchdayEditPage from "./pages/MyLeagueMatchdayEditPage";
 import MyLeagueStandingsPage from "./pages/MyLeagueStandingsPage";
+import MyLeagueStatsPage from "./pages/MyLeagueStatsPage";
 
 
 export default function App() {
@@ -135,6 +136,7 @@ export default function App() {
               <Route path="mis-ligas/:leagueId/jornadas" element={<MyLeagueMatchdaysPage />} />
               <Route path="mis-ligas/:leagueId/jornadas/:matchday/editar" element={<MyLeagueMatchdayEditPage />} />
               <Route path="mis-ligas/:leagueId/clasificacion" element={<MyLeagueStandingsPage />} />
+              <Route path="mis-ligas/:leagueId/estadisticas" element={<MyLeagueStatsPage />} />
             </Route>
 
             {/* opcional: 404 */}

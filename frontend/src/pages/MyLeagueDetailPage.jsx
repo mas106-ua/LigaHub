@@ -142,8 +142,8 @@ export default function MyLeagueDetailPage() {
               Clasificación
             </Button>
 
-            <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary" disabled>
-              Estadísticas (próx.)
+            <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary">
+              Estadísticas
             </Button>
           </div>
 
