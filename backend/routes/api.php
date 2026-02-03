@@ -43,6 +43,7 @@ use App\Http\Controllers\Api\PrivateLeagueScheduleController;
 use App\Http\Controllers\Api\PrivateMatchdayController;
 use App\Http\Controllers\Api\PrivateMatchController;
 use App\Http\Controllers\Api\PrivateMatchResultController;
+use App\Http\Controllers\Api\PrivateLeagueStandingsController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -120,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/private/leagues/{league}/matchdays', [PrivateMatchdayController::class, 'index']);
     Route::get('/private/leagues/{league}/matchdays/{number}/matches', [PrivateMatchController::class, 'byMatchday']);
     Route::put('/private/leagues/{league}/matchdays/{number}/results', [PrivateMatchResultController::class, 'bulkUpdate']);
+    Route::get('/private/leagues/{league}/standings', [PrivateLeagueStandingsController::class, 'index']);
 
 
     /*
