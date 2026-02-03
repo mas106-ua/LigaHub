@@ -46,7 +46,7 @@ class PrivateLeagueStatsService
             return $this->emptyResponse();
         }
 
-        // Inicializar estructura
+        // Inicializar estructura por equipo
         $stats = [];
         foreach ($teams as $t) {
             $stats[$t->id] = [
@@ -106,13 +106,60 @@ class PrivateLeagueStatsService
             }
         }
 
-        // Últimos N partidos (forma)
+        // Últimos N partidos para forma
         $lastN = (int) $request->get('last_n', 5);
         foreach ($stats as &$row) {
             $row['form'] = array_slice($row['form'], -$lastN);
         }
+        unset($row);
 
-        // Rankings
+        /*
+         |--------------------------------------------------------------------------
+         | Rankings y KPIs
+         |--------------------------------------------------------------------------
+         */
+
+        // Ranking por forma (últimos N)
+        $formRanking = collect($stats)
+            ->map(function ($r) {
+                $points = 0;
+                foreach ($r['form'] as $res) {
+                    if ($res === 'W') $points += 3;
+                    elseif ($res === 'D') $points += 1;
+                }
+
+                return [
+                    'team' => $r['team'],
+                    'points_last_n' => $points,
+                    'form' => $r['form'],
+                ];
+            })
+            ->sortByDesc('points_last_n')
+            ->values()
+            ->all();
+
+        // Goles por partido
+        $goalsPerMatch = collect($stats)
+            ->map(fn ($r) => [
+                'team' => $r['team'],
+                'value' => $r['played'] > 0
+                    ? round($r['gf'] / $r['played'], 2)
+                    : 0,
+            ])
+            ->values()
+            ->all();
+
+        // Porterías a cero (ranking)
+        $cleanSheetsRanking = collect($stats)
+            ->sortByDesc('clean_sheets')
+            ->map(fn ($r) => [
+                'team' => $r['team'],
+                'value' => $r['clean_sheets'],
+            ])
+            ->values()
+            ->all();
+
+        // Equipos más goleadores
         $mostScoringTeams = collect($stats)
             ->sortByDesc('gf')
             ->map(fn ($r) => [
@@ -122,6 +169,7 @@ class PrivateLeagueStatsService
             ->values()
             ->all();
 
+        // Equipos más goleados
         $mostConcedingTeams = collect($stats)
             ->sortByDesc('ga')
             ->map(fn ($r) => [
@@ -131,7 +179,12 @@ class PrivateLeagueStatsService
             ->values()
             ->all();
 
-        // Respuesta final
+        /*
+         |--------------------------------------------------------------------------
+         | Respuesta final
+         |--------------------------------------------------------------------------
+         */
+
         return [
             'form' => array_values(
                 array_map(fn ($r) => [
@@ -140,14 +193,9 @@ class PrivateLeagueStatsService
                 ], $stats)
             ),
 
-            'goals_per_match' => array_values(
-                array_map(fn ($r) => [
-                    'team' => $r['team'],
-                    'value' => $r['played'] > 0
-                        ? round($r['gf'] / $r['played'], 2)
-                        : 0,
-                ], $stats)
-            ),
+            'form_ranking' => $formRanking,
+
+            'goals_per_match' => $goalsPerMatch,
 
             'clean_sheets' => array_values(
                 array_map(fn ($r) => [
@@ -156,10 +204,13 @@ class PrivateLeagueStatsService
                 ], $stats)
             ),
 
+            'clean_sheets_ranking' => $cleanSheetsRanking,
+
             'most_scoring_teams' => $mostScoringTeams,
+
             'most_conceding_teams' => $mostConcedingTeams,
 
-            // Preparado para futuros sprints
+            // Preparado para futuros sprints (jugadores / eventos)
             'top_scorers' => [],
         ];
     }
@@ -168,8 +219,10 @@ class PrivateLeagueStatsService
     {
         return [
             'form' => [],
+            'form_ranking' => [],
             'goals_per_match' => [],
             'clean_sheets' => [],
+            'clean_sheets_ranking' => [],
             'most_scoring_teams' => [],
             'most_conceding_teams' => [],
             'top_scorers' => [],
