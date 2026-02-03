@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\League;
 use App\Services\PrivateLeagueStandingsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrivateLeagueStandingsController extends Controller
 {
@@ -22,9 +23,10 @@ class PrivateLeagueStandingsController extends Controller
 
         $user = $request->user();
 
-        // Solo miembros u owner
-        $isOwner = $league->owner_user_id === $user->id;
-        $isMember = $league->members()
+        $isOwner = (int) $league->owner_user_id === (int) $user->id;
+
+        $isMember = DB::table('league_memberships')
+            ->where('league_id', $league->id)
             ->where('user_id', $user->id)
             ->exists();
 
