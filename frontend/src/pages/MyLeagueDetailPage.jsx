@@ -135,6 +135,13 @@ export default function MyLeagueDetailPage() {
               Jornadas
             </Button>
 
+            <Button
+              variant="outline-primary"
+              onClick={() => navigate(`/mis-ligas/${leagueId}/clasificacion`)}
+            >
+              Clasificación
+            </Button>
+
             <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary" disabled>
               Estadísticas (próx.)
             </Button>
