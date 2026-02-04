@@ -45,7 +45,9 @@ use App\Http\Controllers\Api\PrivateMatchController;
 use App\Http\Controllers\Api\PrivateMatchResultController;
 use App\Http\Controllers\Api\PrivateLeagueStandingsController;
 use App\Http\Controllers\Api\PrivateLeagueStatsController;
+
 use App\Http\Controllers\Api\PrivateMatchReportController;
+use App\Http\Controllers\Api\PrivateMatchReportDownloadController;
 
 Route::get('/ping', fn () => ['pong' => now()]);
 
@@ -127,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/private/leagues/{league}/stats', [PrivateLeagueStatsController::class, 'index']);
 
     Route::post('/private/matches/{match}/report', [PrivateMatchReportController::class, 'generate']);
+    Route::get('/private/matches/{match}/report', [PrivateMatchReportDownloadController::class, 'download']);
 
     /*
     |--------------------------------------------------------------------------
