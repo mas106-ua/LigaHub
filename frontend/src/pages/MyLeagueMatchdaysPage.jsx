@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Alert, Badge, Button, Card, Form, Spinner, Table } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link,useNavigate, useParams } from "react-router-dom";
 import { getPrivateLeagueDetail } from "../api/privateLeagueDetail";
 import {
   getPrivateLeagueMatchdays,
   getPrivateLeagueMatchesByMatchday,
 } from "../api/privateLeagueMatchdays";
+import MatchReportActions from "../components/MatchReportActions";
 
 const STATUS_VARIANT = {
   scheduled: "secondary",
@@ -150,6 +151,7 @@ export default function MyLeagueMatchdaysPage() {
                       <th className="text-center">Resultado</th>
                       <th>Visitante</th>
                       <th className="text-center">Estado</th>
+                      <th className="text-end">Acta</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,6 +168,13 @@ export default function MyLeagueMatchdaysPage() {
                           <Badge bg={STATUS_VARIANT[m.status] ?? "secondary"}>
                             {STATUS_LABEL[m.status] ?? m.status}
                           </Badge>
+                        </td>
+                        <td className="text-end">
+                          <MatchReportActions
+                            matchId={m.id}
+                            canManage={canManage}
+                            matchStatus={m.status}
+                          />
                         </td>
                       </tr>
                     ))}
