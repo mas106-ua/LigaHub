@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { Alert, Badge, Button, Card, Form, Spinner, Table } from "react-bootstrap";
-import { Link,useNavigate, useParams } from "react-router-dom";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Form,
+  Spinner,
+  Table,
+} from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getPrivateLeagueDetail } from "../api/privateLeagueDetail";
 import {
   getPrivateLeagueMatchdays,
@@ -92,94 +100,110 @@ export default function MyLeagueMatchdaysPage() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center">
+      <div className="app-private-shell d-flex justify-content-center">
         <Spinner animation="border" />
       </div>
     );
   }
 
   if (error) {
-    return <Alert variant="danger">{error}</Alert>;
+    return (
+      <div className="app-private-shell">
+        <Alert variant="danger">{error}</Alert>
+      </div>
+    );
   }
 
   return (
-    <div className="d-flex justify-content-center">
-      <Card className="shadow-sm border-0" style={{ maxWidth: 1000, width: "100%" }}>
+    <div className="app-private-shell">
+      <Card className="shadow-sm border-0 app-page-card">
         <Card.Body className="p-4">
-          <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="app-page-header">
             <div>
-              <h4 className="mb-1">Jornadas · {league?.name}</h4>
-              <div className="text-muted">Calendario y partidos</div>
+              <h1 className="app-page-title">Jornadas · {league?.name}</h1>
+              <p className="app-page-subtitle mb-0">
+                Calendario y partidos de la liga privada.
+              </p>
             </div>
 
-            <div className="d-flex gap-2">
+            <div className="app-page-actions">
               {canManage && selected && (
                 <Button variant="outline-primary" onClick={goEdit}>
                   Editar jornada
                 </Button>
               )}
-              <Button variant="secondary" onClick={() => navigate(`/mis-ligas/${leagueId}`)}>
+              <Button
+                as={Link}
+                to={`/mis-ligas/${leagueId}`}
+                variant="secondary"
+              >
                 Volver
               </Button>
             </div>
           </div>
 
           {matchdays.length === 0 && (
-            <Alert variant="info">El calendario aún no está publicado.</Alert>
+            <Alert variant="info" className="mt-3">
+              El calendario aún no está publicado.
+            </Alert>
           )}
 
           {matchdays.length > 0 && (
             <>
-              <Form.Group className="mb-3" style={{ maxWidth: 220 }}>
-                <Form.Label className="fw-semibold">Jornada</Form.Label>
-                <Form.Select value={selected ?? ""} onChange={onChangeMatchday}>
-                  {matchdays.map((md) => (
-                    <option key={md.number} value={md.number}>
-                      Jornada {md.number}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+              <div className="app-page-filter-inline mt-3 mb-3">
+                <Form.Group className="app-page-filter-inline__control">
+                  <Form.Label className="fw-semibold">Jornada</Form.Label>
+                  <Form.Select value={selected ?? ""} onChange={onChangeMatchday}>
+                    {matchdays.map((md) => (
+                      <option key={md.number} value={md.number}>
+                        Jornada {md.number}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
 
               {loadingMatches ? (
                 <Spinner animation="border" />
               ) : (
-                <Table bordered hover responsive className="align-middle">
-                  <thead>
-                    <tr>
-                      <th>Local</th>
-                      <th className="text-center">Resultado</th>
-                      <th>Visitante</th>
-                      <th className="text-center">Estado</th>
-                      <th className="text-end">Acta</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matches.map((m) => (
-                      <tr key={m.id}>
-                        <td>{m.home_team?.name}</td>
-                        <td className="text-center">
-                          {m.status === "played"
-                            ? `${m.score?.home ?? 0} - ${m.score?.away ?? 0}`
-                            : "—"}
-                        </td>
-                        <td>{m.away_team?.name}</td>
-                        <td className="text-center">
-                          <Badge bg={STATUS_VARIANT[m.status] ?? "secondary"}>
-                            {STATUS_LABEL[m.status] ?? m.status}
-                          </Badge>
-                        </td>
-                        <td className="text-end">
-                          <MatchReportActions
-                            matchId={m.id}
-                            canManage={canManage}
-                            matchStatus={m.status}
-                          />
-                        </td>
+                <div className="table-responsive">
+                  <Table bordered hover responsive className="align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Local</th>
+                        <th className="text-center">Resultado</th>
+                        <th>Visitante</th>
+                        <th className="text-center">Estado</th>
+                        <th className="text-end">Acta</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                    </thead>
+                    <tbody>
+                      {matches.map((m) => (
+                        <tr key={m.id}>
+                          <td>{m.home_team?.name}</td>
+                          <td className="text-center">
+                            {m.status === "played"
+                              ? `${m.score?.home ?? 0} - ${m.score?.away ?? 0}`
+                              : "—"}
+                          </td>
+                          <td>{m.away_team?.name}</td>
+                          <td className="text-center">
+                            <Badge bg={STATUS_VARIANT[m.status] ?? "secondary"}>
+                              {STATUS_LABEL[m.status] ?? m.status}
+                            </Badge>
+                          </td>
+                          <td className="text-end">
+                            <MatchReportActions
+                              matchId={m.id}
+                              canManage={canManage}
+                              matchStatus={m.status}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
               )}
             </>
           )}
