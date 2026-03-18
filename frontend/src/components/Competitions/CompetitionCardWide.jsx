@@ -11,34 +11,34 @@ const genderIcon = (league) => {
 
   const g = league?.category?.gender;
   if (g === "female") return "/img/leagues/logo_f.svg";
-  if (g === "male")   return "/img/leagues/logo_m.svg";
+  if (g === "male") return "/img/leagues/logo_m.svg";
 
   return "/img/leagues/logo_m.svg";
 };
 
 export default function CompetitionCardWide({ league }) {
   return (
-    <div className="card shadow-sm">
-      <div className="card-body d-flex flex-column flex-lg-row align-items-start gap-3">
+    <article className="card shadow-sm app-competition-card">
+      <div className="card-body app-competition-card__body">
         <img
           src={genderIcon(league)}
-          alt="Logo género"
+          alt="Logo de la competición"
           width={48}
           height={48}
-          className="rounded"
+          className="rounded app-competition-card__logo"
         />
 
-        <div className="flex-grow-1">
-          <h2 className="h5 mb-1">{league.name}</h2>
+        <div className="app-competition-card__content">
+          <h2 className="h5 app-competition-card__title">{league.name}</h2>
           <LeagueMeta league={league} compact />
         </div>
 
-        <div className="ms-lg-auto">
+        <div className="app-competition-card__actions">
           <Link to={`/comp/${league.id}`} className="btn btn-primary">
             Ver liga
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

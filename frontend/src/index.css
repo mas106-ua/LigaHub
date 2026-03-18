@@ -1373,3 +1373,361 @@ a:hover {
 /* zebra suave */
 .bench2__row:nth-child(odd) .bench2__cell{ background:#fff; }
 .bench2__row:nth-child(even) .bench2__cell{ background:#fcfcfc; }
+
+/* ======================================
+   FE-13 — Shared responsive components
+   ====================================== */
+
+.app-competition-card {
+  height: 100%;
+}
+
+.app-competition-card__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.app-competition-card__logo {
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.app-competition-card__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-competition-card__title {
+  margin-bottom: 0.35rem;
+  word-break: break-word;
+}
+
+.app-competition-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.app-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+}
+
+.app-meta-list--compact {
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.app-meta-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.app-meta-item strong {
+  color: #4b5563;
+}
+
+.app-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  color: #6b7280;
+}
+
+.app-meta-line__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.app-meta-line__separator {
+  color: #9ca3af;
+}
+
+.app-filter-card .card-body {
+  padding: 1.25rem;
+}
+
+.app-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.app-filter-field {
+  min-width: 0;
+}
+
+.app-filter-field--search {
+  grid-column: 1 / -1;
+}
+
+.app-filter-field--half {
+  grid-column: span 6;
+}
+
+.app-filter-help {
+  margin-top: 0.4rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.app-filter-card .form-control,
+.app-filter-card .form-select {
+  min-height: 3rem;
+  border-radius: 0.9rem;
+}
+
+.app-filter-card .form-label {
+  margin-bottom: 0.45rem;
+}
+
+.app-pagination-wrapper {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.app-pagination {
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 0.5rem;
+}
+
+.app-pagination__summary {
+  color: #6b7280;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.pagination .page-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+button.page-link {
+  border: 1px solid #dee2e6;
+  background: #fff;
+}
+
+.app-tabs-scroller {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-tabs-scroller::-webkit-scrollbar {
+  height: 6px;
+}
+
+.app-tabs-scroller::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+}
+
+.app-scroll-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  width: max-content;
+  min-width: 100%;
+  padding-bottom: 0.25rem;
+}
+
+.app-scroll-tabs .nav-link {
+  white-space: nowrap;
+}
+
+.app-scroll-tabs--underline {
+  border-bottom: 0;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem 1rem;
+  align-items: center;
+}
+
+.match-row__main {
+  min-width: 0;
+}
+
+.match-row__meta {
+  color: #6b7280;
+  font-size: 0.88rem;
+  margin-bottom: 0.25rem;
+}
+
+.match-row__teams {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.match-row__team {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.match-row__vs {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.match-row__aside {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.match-row__score {
+  min-width: 52px;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.app-league-header__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-league-header__summary {
+  min-width: 0;
+}
+
+.app-league-header__title {
+  margin: 0 0 0.35rem;
+  word-break: break-word;
+}
+
+.app-season-switcher {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-season-switcher__control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-season-switcher__control label {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.app-season-switcher__control .form-select {
+  min-width: 12rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1rem;
+}
+
+.table-responsive > .table {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .app-competition-card__body {
+    align-items: stretch;
+  }
+
+  .app-filter-field--half {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .app-competition-card__body {
+    flex-direction: column;
+  }
+
+  .app-competition-card__actions {
+    width: 100%;
+  }
+
+  .app-competition-card__actions .btn {
+    width: 100%;
+  }
+
+  .app-filter-grid {
+    gap: 0.85rem;
+  }
+
+  .app-filter-field--half,
+  .app-filter-field--search {
+    grid-column: 1 / -1;
+  }
+
+  .app-scroll-tabs {
+    min-width: max-content;
+  }
+
+  .match-row {
+    grid-template-columns: 1fr;
+  }
+
+  .match-row__teams {
+    flex-wrap: wrap;
+  }
+
+  .match-row__aside {
+    justify-content: flex-start;
+  }
+
+  .app-season-switcher {
+    justify-content: stretch;
+  }
+
+  .app-season-switcher__control {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .app-season-switcher__control .form-select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .table-responsive > .table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .app-filter-card .card-body {
+    padding: 1rem;
+  }
+
+  .app-pagination {
+    gap: 0.25rem;
+  }
+
+  .pagination .page-link {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.92rem;
+  }
+}
