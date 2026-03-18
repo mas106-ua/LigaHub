@@ -1375,7 +1375,7 @@ a:hover {
 .bench2__row:nth-child(even) .bench2__cell{ background:#fcfcfc; }
 
 /* ======================================
-   FE-13 — Shared responsive components
+   Shared responsive components
    ====================================== */
 
 .app-competition-card {
@@ -1729,5 +1729,263 @@ button.page-link {
   .pagination .page-link {
     padding: 0.45rem 0.7rem;
     font-size: 0.92rem;
+  }
+}
+
+/* ======================================
+   Responsive core pages
+   ====================================== */
+
+.app-page-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-page-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
+  line-height: 1.15;
+}
+
+.app-page-subtitle {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  max-width: 68ch;
+}
+
+.app-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.app-page-card {
+  overflow: hidden;
+}
+
+.app-page-filter-panel .card-body {
+  padding: 1.25rem;
+}
+
+.app-page-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.app-page-filter-col {
+  grid-column: span 3;
+  min-width: 0;
+}
+
+.app-page-filter-col--wide {
+  grid-column: span 4;
+}
+
+.app-page-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.app-page-toolbar__end {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-page-toolbar__end .form-select {
+  width: auto;
+  min-width: 5.25rem;
+}
+
+.app-page-filter-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+.app-page-filter-inline__control {
+  min-width: min(100%, 16rem);
+}
+
+.app-inline-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.app-detail-list dt {
+  margin-bottom: 0.2rem;
+}
+
+.app-detail-list dd {
+  margin-bottom: 0.75rem;
+}
+
+.app-private-shell {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.app-private-hero {
+  background: linear-gradient(135deg, #c8102e 0%, #990021 100%);
+  color: #fff;
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.app-private-hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-private-hero__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.app-private-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-private-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(30, 30, 30, 0.08);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.app-private-list__content {
+  min-width: 0;
+}
+
+.app-chip-scroller {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-chip-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  width: max-content;
+  min-width: 100%;
+  padding-bottom: 0.25rem;
+}
+
+.app-match-page .match-hero__team {
+  width: 100%;
+}
+
+.app-match-admin-panel {
+  max-width: 100%;
+}
+
+.app-match-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.app-match-report-panel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.match-content > .container,
+.match-content > .container-fluid,
+.match-content > .card {
+  max-width: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .app-page-filter-col,
+  .app-page-filter-col--wide {
+    grid-column: span 6;
+  }
+
+  .app-private-shell {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .app-page-filter-panel .card-body {
+    padding: 1rem;
+  }
+
+  .app-page-filter-grid {
+    gap: 0.85rem;
+  }
+
+  .app-page-filter-col,
+  .app-page-filter-col--wide {
+    grid-column: 1 / -1;
+  }
+
+  .app-page-toolbar {
+    justify-content: stretch;
+  }
+
+  .app-page-toolbar__end {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-page-toolbar__end .form-select {
+    flex: 1 1 auto;
+  }
+
+  .app-private-hero {
+    padding: 1rem;
+  }
+
+  .app-private-hero__meta {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .app-private-hero__meta .btn,
+  .app-private-hero__meta .badge {
+    width: fit-content;
+  }
+
+  .app-private-list__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-private-list__item .btn {
+    width: 100%;
+  }
+
+  .app-match-report-panel .btn,
+  .app-match-admin-actions .btn {
+    width: 100%;
   }
 }
