@@ -1989,3 +1989,180 @@ button.page-link {
     width: 100%;
   }
 }
+
+/* ======================================
+   FE-15 — Accessibility foundation
+   ====================================== */
+
+body {
+  line-height: 1.5;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+.nav-link:focus-visible,
+.page-link:focus-visible,
+.btn:focus-visible,
+.form-check-input:focus-visible {
+  outline: 3px solid #111827;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.95) !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(200, 16, 46, 0.25);
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-text {
+  color: #4b5563;
+}
+
+.form-control::placeholder,
+.form-select::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.alert-success {
+  background-color: #18794e;
+  color: #fff;
+  border: none;
+}
+
+.alert-danger {
+  background-color: #b42318;
+  color: #fff;
+  border: none;
+}
+
+.app-auth-shell {
+  min-height: calc(100vh - 7rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+.app-auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.app-auth-card__header {
+  background: linear-gradient(135deg, #c8102e 0%, #990021 100%);
+  color: #fff;
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+
+.app-auth-card__title {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.app-auth-card__subtitle {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.app-auth-card__body {
+  padding: 1.5rem;
+}
+
+.app-auth-card__footer-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.app-accessibility-card {
+  border-radius: 1.25rem;
+}
+
+.app-form-card {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.app-form-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.app-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.app-avatar-field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  border: 2px solid #d1d5db;
+}
+
+@media (max-width: 767.98px) {
+  .app-auth-shell {
+    min-height: auto;
+    padding: 1rem 0;
+  }
+
+  .app-auth-card__header,
+  .app-auth-card__body {
+    padding: 1.25rem;
+  }
+
+  .app-form-actions {
+    justify-content: stretch;
+  }
+
+  .app-form-actions .btn {
+    width: 100%;
+  }
+
+  .app-avatar-field {
+    align-items: flex-start;
+  }
+}
