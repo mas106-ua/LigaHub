@@ -25,54 +25,56 @@ export default function Login() {
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "100vh", backgroundColor: "var(--color-light)" }}
-    >
-      <div
-        className="shadow-lg"
-        style={{
-          width: "100%",
-          maxWidth: "440px",
-          background: "#fff",
-          borderRadius: "1.25rem",
-        }}
+    <div className="app-auth-shell">
+      <section
+        className="app-auth-card shadow-lg"
+        aria-labelledby="login-title"
       >
-        <div
-          style={{
-            background: "linear-gradient(135deg, #C8102E 0%, #990021 100%)",
-            color: "#fff",
-            borderTopLeftRadius: "1.25rem",
-            borderTopRightRadius: "1.25rem",
-            padding: "1.75rem 1.5rem 1.5rem",
-          }}
-        >
-          <h3 className="mb-1 fw-semibold">Iniciar sesión</h3>
+        <div className="app-auth-card__header">
+          <h1 id="login-title" className="app-auth-card__title">
+            Iniciar sesión
+          </h1>
+          <p className="app-auth-card__subtitle">
+            Accede a tu cuenta para gestionar tu perfil y tus ligas.
+          </p>
         </div>
 
-        <div className="p-4">
-          {error && <p className="text-danger small mb-3">{error}</p>}
-          <form onSubmit={handleSubmit}>
+        <div className="app-auth-card__body">
+          {error && (
+            <div className="alert alert-danger mb-3" role="alert">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate>
             <div className="mb-3">
-              <label className="form-label">Email</label>
+              <label htmlFor="login-email" className="form-label">
+                Correo electrónico
+              </label>
               <input
+                id="login-email"
                 type="email"
                 className="form-control"
                 placeholder="tu@correo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="form-label">Contraseña</label>
+              <label htmlFor="login-password" className="form-label">
+                Contraseña
+              </label>
               <input
+                id="login-password"
                 type="password"
                 className="form-control"
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -92,14 +94,14 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center mt-3 mb-0" style={{ fontSize: "0.9rem" }}>
+          <p className="text-center mt-3 mb-0 app-auth-card__footer-text">
             ¿No tienes cuenta?{" "}
             <Link to="/register" className="fw-semibold text-primary">
               Regístrate
             </Link>
           </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
