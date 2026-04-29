@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\League;
+use App\Models\LeagueMembership;
 use App\Models\User;
 use App\Notifications\PrivateLeagueInvitationNotification;
 use Illuminate\Http\JsonResponse;
@@ -119,17 +120,7 @@ class PrivateLeagueInviteController extends Controller
             abort(404);
         }
 
-        $league = League::query()
-            ->where('type', 'private')
-            ->where('visibility', 'by_link')
-            ->where('is_active', true)
-            ->where('access_uuid', $token)
-            ->with([
-                'season:id,code',
-                'category:id,name',
-                'region:id,code,name',
-            ])
-            ->first();
+        $league = $this->findInvitableLeagueByToken($token);
 
         if (! $league) {
             abort(404);
@@ -159,6 +150,98 @@ class PrivateLeagueInviteController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * POST /api/private-league-invitations/{token}/accept
+     *
+     * Acepta una invitación y vincula al usuario autenticado como miembro.
+     */
+    public function accept(Request $request, string $token): JsonResponse
+    {
+        if (! Str::isUuid($token)) {
+            abort(404);
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            abort(401);
+        }
+
+        $league = $this->findInvitableLeagueByToken($token);
+
+        if (! $league) {
+            abort(404);
+        }
+
+        $membership = DB::transaction(function () use ($league, $user) {
+            $existing = LeagueMembership::query()
+                ->where('league_id', $league->id)
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
+            return LeagueMembership::query()->create([
+                'league_id' => $league->id,
+                'user_id' => $user->id,
+                'role_in_league' => 'member',
+                'joined_at' => now(),
+            ]);
+        });
+
+        $alreadyMember = $membership->wasRecentlyCreated === false;
+
+        return response()->json([
+            'message' => $alreadyMember
+                ? 'Ya perteneces a esta liga privada.'
+                : 'Invitación aceptada correctamente.',
+            'data' => [
+                'accepted' => true,
+                'already_member' => $alreadyMember,
+                'league' => [
+                    'id' => $league->id,
+                    'name' => $league->name,
+                    'season' => $league->season ? [
+                        'id' => $league->season->id,
+                        'code' => $league->season->code,
+                    ] : null,
+                    'category' => $league->category ? [
+                        'id' => $league->category->id,
+                        'name' => $league->category->name,
+                    ] : null,
+                    'region' => $league->region ? [
+                        'id' => $league->region->id,
+                        'code' => $league->region->code,
+                        'name' => $league->region->name,
+                    ] : null,
+                ],
+                'membership' => [
+                    'role_in_league' => $membership->role_in_league,
+                    'joined_at' => optional($membership->joined_at)->toISOString(),
+                ],
+                'redirect_to' => "/mis-ligas/{$league->id}",
+            ],
+        ]);
+    }
+
+    private function findInvitableLeagueByToken(string $token): ?League
+    {
+        return League::query()
+            ->where('type', 'private')
+            ->where('visibility', 'by_link')
+            ->where('is_active', true)
+            ->where('access_uuid', $token)
+            ->with([
+                'season:id,code',
+                'category:id,name',
+                'region:id,code,name',
+            ])
+            ->first();
     }
 
     private function canManagePrivateLeague(User $user, League $league): bool
