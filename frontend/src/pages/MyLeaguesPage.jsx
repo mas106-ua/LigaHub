@@ -32,24 +32,101 @@ function normalizeLeagueStats(league) {
   };
 }
 
+function getLeaguePath(league, suffix = "") {
+  const base = league.links?.detail || `/mis-ligas/${league.id}`;
+  return `${base}${suffix}`;
+}
+
+function EmptyState({ hasFilters, onClearFilters }) {
+  return (
+    <div className="app-my-leagues-state">
+      <div className="app-my-leagues-state__icon" aria-hidden="true">
+        ⚽
+      </div>
+
+      <div>
+        <h2 className="h5 mb-1">
+          {hasFilters
+            ? "No hay ligas con esos filtros"
+            : "Aún no tienes ligas privadas"}
+        </h2>
+
+        <p className="text-muted mb-0">
+          {hasFilters
+            ? "Prueba a modificar la búsqueda, el rol o la temporada."
+            : "Cuando crees una liga o aceptes una invitación, aparecerá en este panel."}
+        </p>
+      </div>
+
+      <div className="app-page-actions">
+        {hasFilters && (
+          <Button variant="outline-secondary" onClick={onClearFilters}>
+            Limpiar filtros
+          </Button>
+        )}
+
+        <Button as={Link} to="/mis-ligas/crear" variant="primary">
+          Crear liga
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ message, onRetry }) {
+  return (
+    <div className="app-my-leagues-state app-my-leagues-state--error">
+      <div className="app-my-leagues-state__icon" aria-hidden="true">
+        !
+      </div>
+
+      <div>
+        <h2 className="h5 mb-1">No se pudo cargar el panel</h2>
+        <p className="text-muted mb-0">{message}</p>
+      </div>
+
+      <div className="app-page-actions">
+        <Button variant="primary" onClick={onRetry}>
+          Reintentar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function PrivateLeagueCard({ league }) {
   const stats = normalizeLeagueStats(league);
+  const detailPath = getLeaguePath(league);
 
   return (
     <article className="app-my-league-card">
       <div className="app-my-league-card__main">
         <div className="app-my-league-card__header">
-          <h3 className="app-my-league-card__title">{league.name}</h3>
+          <div className="app-my-league-card__title-block">
+            <h3 className="app-my-league-card__title">{league.name}</h3>
 
-          <Badge bg={roleVariant(league.role_in_league)}>
-            {roleLabel(league)}
-          </Badge>
-        </div>
+            <div className="app-my-league-card__meta">
+              {league.season?.code && <span>Temporada {league.season.code}</span>}
+              {league.category?.name && <span>{league.category.name}</span>}
+              {league.region?.name && <span>{league.region.name}</span>}
+            </div>
+          </div>
 
-        <div className="app-my-league-card__meta">
-          {league.season?.code && <span>Temporada {league.season.code}</span>}
-          {league.category?.name && <span>{league.category.name}</span>}
-          {league.region?.name && <span>{league.region.name}</span>}
+          <div className="app-my-league-card__role">
+            <Badge bg={roleVariant(league.role_in_league)}>
+              {roleLabel(league)}
+            </Badge>
+
+            {league.is_active === false ? (
+              <Badge bg="warning" text="dark">
+                Inactiva
+              </Badge>
+            ) : (
+              <Badge bg="light" text="dark">
+                Activa
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="app-my-league-card__badges">
@@ -66,29 +143,82 @@ function PrivateLeagueCard({ league }) {
           {league.can_manage && (
             <span className="badge text-bg-success">Gestión habilitada</span>
           )}
-        </div>
-      </div>
 
-      <div className="app-my-league-card__actions">
-        <Button
-          as={Link}
-          to={league.links?.detail || `/mis-ligas/${league.id}`}
-          variant="outline-primary"
-          size="sm"
-        >
-          Ver liga
-        </Button>
+          {league.visibility && (
+            <span className="badge text-bg-light">
+              Visibilidad: {league.visibility}
+            </span>
+          )}
+        </div>
+
+        <div className="app-my-league-card__quick-actions">
+          <Button
+            as={Link}
+            to={detailPath}
+            variant="primary"
+            size="sm"
+          >
+            Ver liga
+          </Button>
+
+          <Button
+            as={Link}
+            to={getLeaguePath(league, "/equipos")}
+            variant="outline-primary"
+            size="sm"
+          >
+            Equipos
+          </Button>
+
+          <Button
+            as={Link}
+            to={getLeaguePath(league, "/jornadas")}
+            variant="outline-primary"
+            size="sm"
+          >
+            Jornadas
+          </Button>
+
+          <Button
+            as={Link}
+            to={getLeaguePath(league, "/clasificacion")}
+            variant="outline-secondary"
+            size="sm"
+          >
+            Clasificación
+          </Button>
+
+          <Button
+            as={Link}
+            to={getLeaguePath(league, "/estadisticas")}
+            variant="outline-secondary"
+            size="sm"
+          >
+            Estadísticas
+          </Button>
+
+          {league.can_manage && (
+            <Button
+              as={Link}
+              to={getLeaguePath(league, "/calendario")}
+              variant="outline-success"
+              size="sm"
+            >
+              Calendario
+            </Button>
+          )}
+        </div>
       </div>
     </article>
   );
 }
 
-function LeagueGroup({ title, description, leagues, emptyText }) {
+function LeagueGroup({ id, title, description, leagues, emptyText }) {
   return (
-    <section className="app-my-leagues-group" aria-labelledby={title}>
+    <section className="app-my-leagues-group" aria-labelledby={id}>
       <div className="app-my-leagues-group__header">
         <div>
-          <h2 id={title} className="h5 mb-1">
+          <h2 id={id} className="h5 mb-1">
             {title}
           </h2>
           <p className="text-muted mb-0">{description}</p>
@@ -195,13 +325,13 @@ export default function MyLeaguesPage() {
   );
 
   const hasFilters = !!filters.search || !!filters.role || !!filters.season;
+  const total = meta?.total ?? leagues.length;
 
   return (
     <div className="app-private-shell">
       <Card className="shadow-sm border-0 app-page-card">
         <Card.Body className="p-4">
           {flash && <Alert variant="success">{flash}</Alert>}
-          {error && <Alert variant="danger">{error}</Alert>}
 
           <div className="app-page-header">
             <div>
@@ -293,16 +423,12 @@ export default function MyLeaguesPage() {
             <span>
               {loading
                 ? "Cargando ligas..."
-                : `${meta?.total ?? leagues.length} liga${
-                    (meta?.total ?? leagues.length) === 1 ? "" : "s"
-                  } encontrada${(meta?.total ?? leagues.length) === 1 ? "" : "s"}`}
+                : `${total} liga${total === 1 ? "" : "s"} encontrada${
+                    total === 1 ? "" : "s"
+                  }`}
             </span>
 
-            {hasFilters && (
-              <span className="text-muted">
-                Filtros aplicados
-              </span>
-            )}
+            {hasFilters && <span className="text-muted">Filtros aplicados</span>}
           </div>
 
           {loading && (
@@ -312,17 +438,25 @@ export default function MyLeaguesPage() {
             </div>
           )}
 
+          {!loading && error && (
+            <div className="mt-3">
+              <ErrorState message={error} onRetry={() => load(filters)} />
+            </div>
+          )}
+
           {!loading && !error && leagues.length === 0 && (
-            <div className="alert alert-secondary mt-3 mb-0">
-              {hasFilters
-                ? "No hay ligas privadas que coincidan con los filtros."
-                : "Aún no tienes ligas privadas."}
+            <div className="mt-3">
+              <EmptyState
+                hasFilters={hasFilters}
+                onClearFilters={clearFilters}
+              />
             </div>
           )}
 
           {!loading && !error && leagues.length > 0 && (
             <div className="app-my-leagues-groups mt-3">
               <LeagueGroup
+                id="managed-private-leagues"
                 title="Ligas que administras"
                 description="Ligas donde puedes gestionar configuración, calendario, equipos o invitaciones."
                 leagues={managedLeagues}
@@ -330,6 +464,7 @@ export default function MyLeaguesPage() {
               />
 
               <LeagueGroup
+                id="member-private-leagues"
                 title="Ligas donde participas"
                 description="Ligas privadas en las que tienes acceso como miembro o solo lectura."
                 leagues={memberLeagues}
