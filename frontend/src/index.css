@@ -2237,3 +2237,164 @@ textarea:focus-visible,
     width: 100%;
   }
 }
+
+/* ======================================
+   FE-25 — My private leagues panel
+   ====================================== */
+
+.app-my-leagues-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.app-my-leagues-filters__field {
+  min-width: 0;
+}
+
+.app-my-leagues-filters__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.app-my-leagues-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.app-my-leagues-groups {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.app-my-leagues-group {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-my-leagues-group__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.app-my-leagues-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-my-league-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid rgba(30, 30, 30, 0.08);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.app-my-league-card__main {
+  min-width: 0;
+}
+
+.app-my-league-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.app-my-league-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.app-my-league-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.35rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.app-my-league-card__meta span:not(:last-child)::after {
+  content: "·";
+  margin-left: 0.75rem;
+  color: #9ca3af;
+}
+
+.app-my-league-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.app-my-league-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-my-leagues-empty {
+  padding: 1rem;
+  border: 1px dashed rgba(30, 30, 30, 0.16);
+  border-radius: 1rem;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+@media (max-width: 991.98px) {
+  .app-my-leagues-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-my-leagues-filters__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .app-my-leagues-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .app-my-leagues-filters__actions,
+  .app-my-leagues-filters__actions .btn {
+    width: 100%;
+  }
+
+  .app-my-leagues-filters__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .app-my-league-card {
+    grid-template-columns: 1fr;
+  }
+
+  .app-my-league-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-my-league-card__actions,
+  .app-my-league-card__actions .btn {
+    width: 100%;
+  }
+
+  .app-my-leagues-group__header {
+    flex-direction: column;
+  }
+}
