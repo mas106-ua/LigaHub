@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
     Route::get('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'index']);
     Route::post('/private/leagues/{league}/invite-link', [PrivateLeagueInviteController::class, 'store']);
+    Route::post('/private/leagues/{league}/invite-email', [PrivateLeagueInviteController::class, 'sendEmail']);
 
     Route::post('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'store']);
     Route::put('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'update']);

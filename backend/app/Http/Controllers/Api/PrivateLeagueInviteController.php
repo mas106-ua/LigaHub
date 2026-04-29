@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\League;
 use App\Models\User;
+use App\Notifications\PrivateLeagueInvitationNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 class PrivateLeagueInviteController extends Controller
@@ -16,7 +18,7 @@ class PrivateLeagueInviteController extends Controller
      * POST /api/private/leagues/{league}/invite-link
      *
      * Genera o reutiliza el enlace único de invitación de una liga privada.
-     * No envía correos ni vincula usuarios; eso se hará en tareas posteriores.
+     * No envía correos ni vincula usuarios.
      */
     public function store(Request $request, League $league): JsonResponse
     {
@@ -36,21 +38,65 @@ class PrivateLeagueInviteController extends Controller
             ], 409);
         }
 
-        if (! $league->access_uuid || ! Str::isUuid((string) $league->access_uuid)) {
-            $league->access_uuid = $this->generateUniqueToken();
-        }
-
-        if ($league->visibility !== 'by_link') {
-            $league->visibility = 'by_link';
-        }
-
-        $league->save();
+        $league = $this->ensureInviteLink($league);
 
         return response()->json([
             'message' => 'Enlace de invitación disponible.',
             'data' => [
                 'token' => $league->access_uuid,
                 'invite_url' => $this->buildInviteUrl($request, $league->access_uuid),
+                'frontend_path' => $this->buildFrontendPath($league->access_uuid),
+                'league' => [
+                    'id' => $league->id,
+                    'name' => $league->name,
+                    'visibility' => $league->visibility,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/private/leagues/{league}/invite-email
+     *
+     * Envía por correo el enlace único de invitación de una liga privada.
+     */
+    public function sendEmail(Request $request, League $league): JsonResponse
+    {
+        if ($league->type !== 'private') {
+            abort(404);
+        }
+
+        $user = $request->user();
+
+        if (! $user || ! $this->canManagePrivateLeague($user, $league)) {
+            abort(404);
+        }
+
+        if (! $league->is_active) {
+            return response()->json([
+                'message' => 'No se puede enviar una invitación para una liga inactiva.',
+            ], 409);
+        }
+
+        $validated = $request->validate([
+            'email' => ['required', 'email:rfc', 'max:255'],
+        ]);
+
+        $league = $this->ensureInviteLink($league);
+        $inviteUrl = $this->buildInviteUrl($request, $league->access_uuid);
+
+        Notification::route('mail', $validated['email'])
+            ->notify(new PrivateLeagueInvitationNotification(
+                league: $league,
+                inviteUrl: $inviteUrl,
+                inviter: $user
+            ));
+
+        return response()->json([
+            'message' => 'Invitación enviada correctamente.',
+            'data' => [
+                'email' => $validated['email'],
+                'invite_url' => $inviteUrl,
                 'frontend_path' => $this->buildFrontendPath($league->access_uuid),
                 'league' => [
                     'id' => $league->id,
@@ -130,6 +176,21 @@ class PrivateLeagueInviteController extends Controller
             ->where('user_id', $user->id)
             ->whereIn('role_in_league', ['owner', 'admin'])
             ->exists();
+    }
+
+    private function ensureInviteLink(League $league): League
+    {
+        if (! $league->access_uuid || ! Str::isUuid((string) $league->access_uuid)) {
+            $league->access_uuid = $this->generateUniqueToken();
+        }
+
+        if ($league->visibility !== 'by_link') {
+            $league->visibility = 'by_link';
+        }
+
+        $league->save();
+
+        return $league->refresh();
     }
 
     private function generateUniqueToken(): string
