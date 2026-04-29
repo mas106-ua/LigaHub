@@ -231,9 +231,17 @@ export default function PrivateLeagueInvitationPage() {
                     Ir a la liga
                   </button>
 
-                  <Link to="/mis-ligas" className="btn btn-outline-secondary">
+                  <Link
+                    to="/mis-ligas"
+                    state={{
+                        flash: acceptResult.already_member
+                        ? "Ya pertenecías a esta liga privada."
+                        : "Liga añadida a tus ligas privadas.",
+                    }}
+                    className="btn btn-outline-secondary"
+                    >
                     Ver mis ligas privadas
-                  </Link>
+                    </Link>
                 </div>
               )}
             </>

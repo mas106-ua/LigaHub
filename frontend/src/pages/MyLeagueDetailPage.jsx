@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Badge, Button, Card, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getPrivateLeagueDetail } from "../api/privateLeagueDetail";
+import PrivateLeagueInviteEmailForm from "../components/private/PrivateLeagueInviteEmailForm";
 
 export default function MyLeagueDetailPage() {
   const { leagueId } = useParams();
@@ -146,6 +147,15 @@ export default function MyLeagueDetailPage() {
               Estadísticas
             </Button>
           </div>
+
+          {canManage && (
+            <div className="mt-4">
+              <PrivateLeagueInviteEmailForm
+                leagueId={leagueId}
+                canManage={canManage}
+              />
+            </div>
+          )}
 
           <hr />
 
