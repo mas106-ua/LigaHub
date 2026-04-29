@@ -10,7 +10,13 @@ export default function Login() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const fromLocation = location.state?.from;
+
+  const redirectTo =
+    fromLocation?.pathname &&
+    !["/login", "/register"].includes(fromLocation.pathname)
+      ? `${fromLocation.pathname}${fromLocation.search || ""}`
+      : "/";
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -18,7 +24,7 @@ export default function Login() {
 
     const res = await login({ email, password });
     if (res.ok) {
-      navigate(from, { replace: true });
+      navigate(redirectTo, { replace: true });
     } else {
       setError(res.message || "Error de inicio de sesión");
     }
@@ -96,7 +102,11 @@ export default function Login() {
 
           <p className="text-center mt-3 mb-0 app-auth-card__footer-text">
             ¿No tienes cuenta?{" "}
-            <Link to="/register" className="fw-semibold text-primary">
+            <Link
+              to="/register"
+              state={{ from: fromLocation || { pathname: "/", search: "" } }}
+              className="fw-semibold text-primary"
+            >
               Regístrate
             </Link>
           </p>

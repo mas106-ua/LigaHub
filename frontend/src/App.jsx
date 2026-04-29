@@ -37,6 +37,7 @@ import MyLeagueMatchdaysPage from "./pages/MyLeagueMatchdaysPage";
 import MyLeagueMatchdayEditPage from "./pages/MyLeagueMatchdayEditPage";
 import MyLeagueStandingsPage from "./pages/MyLeagueStandingsPage";
 import MyLeagueStatsPage from "./pages/MyLeagueStatsPage";
+import PrivateLeagueInvitationPage from "./pages/PrivateLeagueInvitationPage";
 
 
 export default function App() {
@@ -66,6 +67,11 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
+
+            <Route
+              path="/mis-ligas/invitacion/:token"
+              element={<PrivateLeagueInvitationPage />}
+            />
 
             {/* privadas */}
             <Route element={<RequireAuth />}>

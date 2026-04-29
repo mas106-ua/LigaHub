@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import { registerUser } from "../api/auth";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -40,7 +40,12 @@ export default function Register() {
     try {
       await registerUser(form);
       setMessage("Cuenta creada correctamente.");
-      setTimeout(() => (window.location.href = "/login"), 2000);
+      setTimeout(() => {
+        navigate("/login", {
+          replace: true,
+          state: { from: returnTo },
+        });
+      }, 1200);
     } catch (err) {
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {});
@@ -66,6 +71,16 @@ export default function Register() {
     typeof errors.password_confirmation === "string"
       ? errors.password_confirmation
       : errors.password_confirmation?.[0] || "";
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const fromLocation = location.state?.from;
+  const returnTo =
+    fromLocation?.pathname &&
+    !["/login", "/register"].includes(fromLocation.pathname)
+      ? fromLocation
+      : { pathname: "/", search: "" };
 
   return (
     <div className="app-auth-shell">
@@ -179,7 +194,11 @@ export default function Register() {
 
           <p className="text-center mt-3 mb-0 app-auth-card__footer-text">
             ¿Ya tienes cuenta?{" "}
-            <Link to="/login" className="fw-semibold text-primary">
+            <Link
+              to="/login"
+              state={{ from: returnTo }}
+              className="fw-semibold text-primary"
+            >
               Inicia sesión
             </Link>
           </p>
