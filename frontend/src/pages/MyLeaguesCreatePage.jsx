@@ -37,56 +37,72 @@ export default function MyLeaguesCreatePage() {
       });
     } catch (err) {
       if (err?.response?.status === 422) {
-        setErrors(err.response.data?.errors || { general: ["Validación incorrecta."] });
+        setErrors(
+          err.response.data?.errors || {
+            general: ["Validación incorrecta."],
+          }
+        );
       } else {
-        setErrors({ general: ["No se pudo crear la liga. Inténtalo de nuevo."] });
+        setErrors({
+          general: ["No se pudo crear la liga. Inténtalo de nuevo."],
+        });
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const nameError = firstError(errors.name);
+  const generalError = firstError(errors.general);
+
   return (
     <div className="d-flex justify-content-center">
-      <Card className="shadow-sm border-0" style={{ maxWidth: 560, width: "100%", borderRadius: "1rem" }}>
-        <div
-          style={{
-            background: "linear-gradient(135deg, #C8102E 0%, #990021 100%)",
-            color: "#fff",
-            borderTopLeftRadius: "1rem",
-            borderTopRightRadius: "1rem",
-            padding: "1.25rem 1.25rem 1rem",
-          }}
-        >
-          <h4 className="mb-0 fw-semibold">Crear liga privada</h4>
-          <small className="text-white-50">Formulario básico</small>
+      <Card className="shadow-sm border-0 app-accessibility-card app-form-card">
+        <div className="app-auth-card__header">
+          <h1 className="app-auth-card__title">Crear liga privada</h1>
+          <p className="app-auth-card__subtitle">
+            Define el nombre inicial de la liga para empezar su configuración.
+          </p>
         </div>
 
         <Card.Body className="p-4">
-          {firstError(errors.general) && <Alert variant="danger">{firstError(errors.general)}</Alert>}
+          {generalError && (
+            <Alert variant="danger" role="alert">
+              {generalError}
+            </Alert>
+          )}
 
-          <Form onSubmit={onSubmit}>
-            <Form.Group className="mb-3" controlId="leagueName">
-              <Form.Label>Nombre</Form.Label>
+          <Form onSubmit={onSubmit} noValidate>
+            <Form.Group className="mb-3" controlId="league-name">
+              <Form.Label>Nombre de la liga</Form.Label>
               <Form.Control
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nombre de la liga"
-                isInvalid={!!firstError(errors.name)}
+                isInvalid={!!nameError}
                 disabled={loading}
                 autoFocus
+                required
               />
-              {firstError(errors.name) && (
-                <Form.Control.Feedback type="invalid">{firstError(errors.name)}</Form.Control.Feedback>
+              {nameError && (
+                <Form.Control.Feedback type="invalid">
+                  {nameError}
+                </Form.Control.Feedback>
               )}
             </Form.Group>
 
-            <div className="d-flex gap-2">
-              <Button variant="secondary" type="button" disabled={loading} onClick={() => navigate("/mis-ligas")}>
+            <div className="app-form-actions">
+              <Button
+                variant="secondary"
+                type="button"
+                disabled={loading}
+                onClick={() => navigate("/mis-ligas")}
+              >
                 Cancelar
               </Button>
-              <Button variant="primary" type="submit" disabled={loading} className="ms-auto">
+
+              <Button variant="primary" type="submit" disabled={loading}>
                 {loading ? (
                   <>
                     <Spinner animation="border" size="sm" /> Creando...

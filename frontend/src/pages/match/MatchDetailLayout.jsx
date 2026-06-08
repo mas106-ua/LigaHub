@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, Outlet } from "react-router-dom";
+import { useParams, Outlet, Link } from "react-router-dom";
 import { getMatchDetail } from "../../api/matchdays";
 import MatchTabs from "./MatchTabs";
 import { useAuth } from "../../context/AuthContext";
@@ -206,11 +206,12 @@ export default function MatchDetailLayout() {
                     Estado de edición:{" "}
                     <strong>{prettyEditStatus(editStatus)}</strong>
                   </small>
-                  <div className="btn-group btn-group-sm">
+
+                  <div className="d-flex flex-wrap justify-content-center gap-2">
                     {canReopen && (
                       <button
                         type="button"
-                        className="btn btn-outline-secondary"
+                        className="btn btn-outline-secondary btn-sm"
                         onClick={() => handleLockAction("open")}
                         disabled={lockLoading}
                       >
@@ -221,7 +222,7 @@ export default function MatchDetailLayout() {
                     {canClose && (
                       <button
                         type="button"
-                        className="btn btn-outline-warning"
+                        className="btn btn-outline-warning btn-sm"
                         onClick={() => handleLockAction("close")}
                         disabled={lockLoading}
                       >
@@ -232,14 +233,33 @@ export default function MatchDetailLayout() {
                     {canVerify && (
                       <button
                         type="button"
-                        className="btn btn-success"
+                        className="btn btn-success btn-sm"
                         onClick={() => handleLockAction("verify")}
                         disabled={lockLoading}
                       >
                         Verificar
                       </button>
                     )}
+
+                    {match.league_id && (
+                      <Link
+                        to={`/admin/ligas/${match.league_id}`}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        Panel de liga
+                      </Link>
+                    )}
+
+                    {match.league_id && match.matchday && (
+                      <Link
+                        to={`/admin/ligas/${match.league_id}/jornadas/${match.matchday}/resultados`}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        Editar resultados
+                      </Link>
+                    )}
                   </div>
+
                   {editStatus === "verified" && !isSuperadmin && (
                     <div className="text-muted small mt-1">
                       Solo un superadmin puede reabrir un partido verificado.

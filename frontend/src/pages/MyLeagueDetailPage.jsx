@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Badge, Button, Card, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getPrivateLeagueDetail } from "../api/privateLeagueDetail";
+import PrivateLeagueInviteEmailForm from "../components/private/PrivateLeagueInviteEmailForm";
 
 export default function MyLeagueDetailPage() {
   const { leagueId } = useParams();
@@ -117,6 +118,12 @@ export default function MyLeagueDetailPage() {
           </div>
 
           <div className="d-flex gap-2 flex-wrap">
+            {canManage && (
+              <Button as={Link} to={`/mis-ligas/${leagueId}/calendario`} variant="success">
+                Calendario
+              </Button>
+            )}
+
             <Button as={Link} to={`/mis-ligas/${leagueId}/equipos`} variant="primary">
               Equipos
             </Button>
@@ -125,14 +132,30 @@ export default function MyLeagueDetailPage() {
               Jugadores
             </Button>
 
-            <Button as={Link} to={`/mis-ligas/${leagueId}/jornadas`} variant="outline-secondary" disabled>
-              Jornadas (próx.)
+            <Button as={Link} to={`/mis-ligas/${leagueId}/jornadas`} variant="outline-primary">
+              Jornadas
             </Button>
 
-            <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary" disabled>
-              Estadísticas (próx.)
+            <Button
+              variant="outline-primary"
+              onClick={() => navigate(`/mis-ligas/${leagueId}/clasificacion`)}
+            >
+              Clasificación
+            </Button>
+
+            <Button as={Link} to={`/mis-ligas/${leagueId}/estadisticas`} variant="outline-secondary">
+              Estadísticas
             </Button>
           </div>
+
+          {canManage && (
+            <div className="mt-4">
+              <PrivateLeagueInviteEmailForm
+                leagueId={leagueId}
+                canManage={canManage}
+              />
+            </div>
+          )}
 
           <hr />
 

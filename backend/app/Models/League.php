@@ -15,7 +15,9 @@ class League extends Model
     protected $fillable = [
         'name', 'type', 'region_id', 'province_id', 'category_id', 'season_id',
         'visibility', 'access_uuid', 'owner_user_id', 'is_active',
-        'competition_id', 'group_name',
+        'competition_id', 'group_name', 'schedule_status',
+        'schedule_type',
+        'schedule_published_at',
     ];
 
     protected $casts = [

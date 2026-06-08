@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\Api\SeasonController;
 
 use App\Http\Controllers\Api\CompetitionController;
+use App\Http\Controllers\Api\PrivateLeagueInviteController;
 
 use App\Http\Controllers\Api\PublicMatchdayController;
 use App\Http\Controllers\Api\PublicMatchController;
@@ -39,6 +40,16 @@ use App\Http\Controllers\Api\PrivateLeagueDetailController;
 use App\Http\Controllers\Api\PrivateLeagueTeamsController;
 use App\Http\Controllers\Api\PrivateLeaguePlayersController;
 
+use App\Http\Controllers\Api\PrivateLeagueScheduleController;
+use App\Http\Controllers\Api\PrivateMatchdayController;
+use App\Http\Controllers\Api\PrivateMatchController;
+use App\Http\Controllers\Api\PrivateMatchResultController;
+use App\Http\Controllers\Api\PrivateLeagueStandingsController;
+use App\Http\Controllers\Api\PrivateLeagueStatsController;
+
+use App\Http\Controllers\Api\PrivateMatchReportController;
+use App\Http\Controllers\Api\PrivateMatchReportDownloadController;
+
 Route::get('/ping', fn () => ['pong' => now()]);
 
 /*
@@ -59,6 +70,7 @@ Route::get('/provinces', [ProvinceController::class, 'index']);
 Route::get('/seasons', [SeasonController::class, 'index']);
 
 Route::get('/competitions', [CompetitionController::class, 'index']);
+Route::get('/private-league-invitations/{token}', [PrivateLeagueInviteController::class, 'show']);
 
 Route::middleware('public_league_guard')->group(function () {
 
@@ -100,6 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my/leagues', [MyLeaguesController::class, 'index']);
     Route::get('/private/leagues/{league}/detail', [PrivateLeagueDetailController::class, 'show']);
     Route::get('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'index']);
+    Route::post('/private/leagues/{league}/invite-link', [PrivateLeagueInviteController::class, 'store']);
+    Route::post('/private/leagues/{league}/invite-email', [PrivateLeagueInviteController::class, 'sendEmail']);
+    Route::post('/private-league-invitations/{token}/accept', [PrivateLeagueInviteController::class, 'accept']);
 
     Route::post('/private/leagues/{league}/teams', [PrivateLeagueTeamsController::class, 'store']);
     Route::put('/private/leagues/{league}/teams/{team}', [PrivateLeagueTeamsController::class, 'update']);
@@ -110,6 +125,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'update']);
     Route::delete('/private/leagues/{league}/players/{player}', [PrivateLeaguePlayersController::class, 'destroy']);
 
+    Route::post('/private/leagues/{league}/schedule/preview', [PrivateLeagueScheduleController::class, 'preview']);
+    Route::post('/private/leagues/{league}/schedule/publish', [PrivateLeagueScheduleController::class, 'publish']);
+    Route::get('/private/leagues/{league}/matchdays', [PrivateMatchdayController::class, 'index']);
+    Route::get('/private/leagues/{league}/matchdays/{number}/matches', [PrivateMatchController::class, 'byMatchday']);
+    Route::put('/private/leagues/{league}/matchdays/{number}/results', [PrivateMatchResultController::class, 'bulkUpdate']);
+    Route::get('/private/leagues/{league}/standings', [PrivateLeagueStandingsController::class, 'index']);
+    Route::get('/private/leagues/{league}/stats', [PrivateLeagueStatsController::class, 'index']);
+
+    Route::post('/private/matches/{match}/report', [PrivateMatchReportController::class, 'generate']);
+    Route::get('/private/matches/{match}/report', [PrivateMatchReportDownloadController::class, 'download']);
 
     /*
     |--------------------------------------------------------------------------

@@ -1,0 +1,26 @@
+import api from "./api";
+import { getCsrf } from "../csrf";
+import { getCookie } from "./utils";
+
+function xsrfHeaders() {
+  const token = getCookie("XSRF-TOKEN");
+  return token ? { "X-XSRF-TOKEN": token } : {};
+}
+
+export async function updatePrivateLeagueResults(leagueId, matchday, matches) {
+  await getCsrf();
+
+  const { data } = await api.put(
+    `/api/private/leagues/${leagueId}/matchdays/${matchday}/results`,
+    { matches },
+    {
+      withCredentials: true,
+      headers: {
+        Accept: "application/json",
+        ...xsrfHeaders(),
+      },
+    }
+  );
+
+  return data;
+}

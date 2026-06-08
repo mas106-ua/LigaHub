@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import MatchStatusBadge from "./MatchStatusBadge";
 
 const fmt = (iso) => {
   if (!iso) return "—";
+
   try {
     const d = new Date(iso);
     return new Intl.DateTimeFormat("es-ES", {
@@ -11,26 +13,47 @@ const fmt = (iso) => {
       hour: "2-digit",
       minute: "2-digit",
     }).format(d);
-  } catch { return iso; }
+  } catch {
+    return iso;
+  }
 };
 
 export default function MatchRow({ m }) {
   const isPlayed = m.status === "played";
   const score = isPlayed && m.score ? `${m.score.home} - ${m.score.away}` : "—";
   const venue = m.venue ? ` · ${m.venue}` : "";
+
   return (
-    <li className="list-group-item d-flex align-items-center justify-content-between">
-      <div className="me-3">
-        <div className="text-muted small">{fmt(m.scheduled_at)}{venue}</div>
-        <div className="fw-medium">
-          {m.home_team?.name || `Equipo ${m.home_team?.id}`}{" "}
-          <span className="text-muted">vs</span>{" "}
-          {m.away_team?.name || `Equipo ${m.away_team?.id}`}
+    <li className="list-group-item match-row">
+      <div className="match-row__main">
+        <div className="match-row__meta">
+          {fmt(m.scheduled_at)}
+          {venue}
+        </div>
+
+        <div className="match-row__teams">
+          <span className="match-row__team">
+            {m.home_team?.name || `Equipo ${m.home_team?.id}`}
+          </span>
+
+          <span className="match-row__vs">vs</span>
+
+          <span className="match-row__team">
+            {m.away_team?.name || `Equipo ${m.away_team?.id}`}
+          </span>
         </div>
       </div>
-      <div className="d-flex align-items-center gap-3">
-        <div className="fs-5 fw-semibold text-center" style={{ minWidth: 48 }}>{score}</div>
+
+      <div className="match-row__aside">
+        <div className="match-row__score">{score}</div>
         <MatchStatusBadge status={m.status} />
+
+        <Link
+          to={`/partido/${m.id}`}
+          className="btn btn-outline-primary btn-sm match-row__detail-link"
+        >
+          Ver partido
+        </Link>
       </div>
     </li>
   );

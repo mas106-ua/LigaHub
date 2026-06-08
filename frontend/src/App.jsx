@@ -32,6 +32,12 @@ import MyLeaguesCreatePage from "./pages/MyLeaguesCreatePage";
 import MyLeagueDetailPage from "./pages/MyLeagueDetailPage";
 import MyLeagueTeamsPage from "./pages/MyLeagueTeamsPage";
 import MyLeaguePlayersPage from "./pages/MyLeaguePlayersPage";
+import MyLeagueSchedulePage from "./pages/MyLeagueSchedulePage";
+import MyLeagueMatchdaysPage from "./pages/MyLeagueMatchdaysPage";
+import MyLeagueMatchdayEditPage from "./pages/MyLeagueMatchdayEditPage";
+import MyLeagueStandingsPage from "./pages/MyLeagueStandingsPage";
+import MyLeagueStatsPage from "./pages/MyLeagueStatsPage";
+import PrivateLeagueInvitationPage from "./pages/PrivateLeagueInvitationPage";
 
 
 export default function App() {
@@ -61,6 +67,11 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forbidden" element={<Forbidden />} />
+
+            <Route
+              path="/mis-ligas/invitacion/:token"
+              element={<PrivateLeagueInvitationPage />}
+            />
 
             {/* privadas */}
             <Route element={<RequireAuth />}>
@@ -126,6 +137,12 @@ export default function App() {
               <Route path="mis-ligas/:leagueId" element={<MyLeagueDetailPage />} />
               <Route path="mis-ligas/:leagueId/equipos" element={<MyLeagueTeamsPage />} />
               <Route path="mis-ligas/:leagueId/jugadores" element={<MyLeaguePlayersPage />} />
+
+              <Route path="mis-ligas/:leagueId/calendario" element={<MyLeagueSchedulePage />} />
+              <Route path="mis-ligas/:leagueId/jornadas" element={<MyLeagueMatchdaysPage />} />
+              <Route path="mis-ligas/:leagueId/jornadas/:matchday/editar" element={<MyLeagueMatchdayEditPage />} />
+              <Route path="mis-ligas/:leagueId/clasificacion" element={<MyLeagueStandingsPage />} />
+              <Route path="mis-ligas/:leagueId/estadisticas" element={<MyLeagueStatsPage />} />
             </Route>
 
             {/* opcional: 404 */}
