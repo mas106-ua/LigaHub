@@ -1,12 +1,13 @@
 // src/pages/admin/AdminMatchEventsPage.jsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getMatchDetail } from "../../api/matchdays";
 import { fetchTeamPlayers } from "../../api/teams";
 import { updateMatchEvents } from "../../api/adminMatches";
 
 export default function AdminMatchEventsPage() {
   const { matchId } = useParams();
+  const navigate = useNavigate();
 
   const [match, setMatch] = useState(null);
   const [playersHome, setPlayersHome] = useState([]);
@@ -18,7 +19,6 @@ export default function AdminMatchEventsPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Usamos 'sub_in' como tipo de cambio en BD, pero lo mostramos como "Cambio"
   const EVENT_TYPES = [
     { value: "goal", label: "Gol" },
     { value: "own_goal", label: "Gol p.p." },
@@ -26,8 +26,6 @@ export default function AdminMatchEventsPage() {
     { value: "red", label: "Roja" },
     { value: "sub_in", label: "Cambio" },
   ];
-
-  // ============ LOAD ============
 
   useEffect(() => {
     let cancel = false;
@@ -53,6 +51,7 @@ export default function AdminMatchEventsPage() {
             setPlayersHome([]);
           }
         }
+
         if (awayId) {
           try {
             setPlayersAway(await fetchTeamPlayers(awayId));
@@ -95,8 +94,6 @@ export default function AdminMatchEventsPage() {
     };
   }, [matchId]);
 
-  // ============ HANDLERS ============
-
   const updateEvent = (idx, patch) => {
     setEvents((prev) =>
       prev.map((ev, i) => (i === idx ? { ...ev, ...patch } : ev))
@@ -138,165 +135,224 @@ export default function AdminMatchEventsPage() {
     }
   };
 
-  // ============ RENDER ============
-
   if (loading) return <div className="container py-4">Cargando eventos…</div>;
-  if (!match) return <div className="container py-4">Partido no encontrado.</div>;
+
+  if (!match) {
+    return (
+      <div className="container py-4">
+        <div className="admin-match-page-header">
+          <div>
+            <h1 className="h4 mb-1">Eventos del partido</h1>
+            <p className="text-muted mb-0">Partido no encontrado.</p>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => navigate(-1)}
+          >
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const homeName = match.home_team?.name || "Local";
+  const awayName = match.away_team?.name || "Visitante";
+  const matchday = match.matchday || "—";
+  const leagueId = match.league_id;
 
   return (
     <div className="container py-4">
-      <h2 className="h4 mb-3">Eventos del partido</h2>
+      <div className="admin-match-page-header">
+        <div>
+          <h1 className="h4 mb-1">Eventos del partido</h1>
+          <p className="text-muted mb-0">
+            {homeName} vs {awayName} · Jornada {matchday}
+          </p>
+        </div>
+
+        <div className="admin-match-page-actions">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => navigate(-1)}
+          >
+            Volver
+          </button>
+        </div>
+      </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <button className="btn btn-sm btn-primary mb-3" onClick={addEvent}>
-        + Añadir evento
-      </button>
+      <div className="admin-match-page-toolbar">
+        <button className="btn btn-sm btn-primary" onClick={addEvent}>
+          + Añadir evento
+        </button>
 
-      <div className="table-responsive">
-        <table className="table table-sm table-bordered align-middle">
-          <thead>
-            <tr className="table-light">
-              <th>Lado</th>
-              <th>Min</th>
-              <th>Tipo</th>
-              <th>Jugador (entra)</th>
-              <th>Jugador (sale)</th>
-              <th>Detalle</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((ev, idx) => {
-              const players =
-                ev.side === "home" ? playersHome : playersAway;
-              const isSub = ev.type === "sub_in";
-
-              return (
-                <tr key={idx}>
-                  <td>
-                    <select
-                      className="form-select form-select-sm"
-                      value={ev.side}
-                      onChange={(e) =>
-                        updateEvent(idx, { side: e.target.value })
-                      }
-                    >
-                      <option value="home">Local</option>
-                      <option value="away">Visitante</option>
-                    </select>
-                  </td>
-
-                  <td width="80">
-                    <input
-                      type="number"
-                      min="0"
-                      className="form-control form-control-sm"
-                      value={ev.minute}
-                      onChange={(e) =>
-                        updateEvent(idx, { minute: e.target.value })
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <select
-                      className="form-select form-select-sm"
-                      value={ev.type}
-                      onChange={(e) => {
-                        const newType = e.target.value;
-                        const patch = { type: newType };
-
-                        // Solo limpiamos el jugador que sale si el tipo deja de ser "Cambio"
-                        if (newType !== "sub_in") {
-                          patch.related_player_id = "";
-                        }
-
-                        updateEvent(idx, patch);
-                      }}
-                    >
-                      <option value="">—</option>
-                      {EVENT_TYPES.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td>
-                    <select
-                      className="form-select form-select-sm"
-                      value={ev.player_id}
-                      onChange={(e) =>
-                        updateEvent(idx, { player_id: e.target.value })
-                      }
-                    >
-                      <option value="">—</option>
-                      {players.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td>
-                    <select
-                      className="form-select form-select-sm"
-                      value={ev.related_player_id}
-                      onChange={(e) =>
-                        updateEvent(idx, {
-                          related_player_id: e.target.value,
-                        })
-                      }
-                      // Solo se puede elegir mientras sea "Cambio" y todavía NO haya valor.
-                      disabled={
-                        !isSub || (ev.related_player_id !== "" && ev.related_player_id !== null)
-                      }
-                    >
-                      <option value="">—</option>
-                      {players.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td>
-                    <input
-                      className="form-control form-control-sm"
-                      value={ev.detail}
-                      onChange={(e) =>
-                        updateEvent(idx, { detail: e.target.value })
-                      }
-                    />
-                  </td>
-
-                  <td width="50">
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => removeEvent(idx)}
-                    >
-                      X
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="text-muted small">
+          Los eventos enriquecen el detalle del partido. El marcador oficial se
+          edita desde resultados de jornada.
+        </div>
       </div>
 
-      <button
-        className="btn btn-primary mt-3"
-        disabled={saving}
-        onClick={handleSave}
-      >
-        {saving ? "Guardando…" : "Guardar cambios"}
-      </button>
+      {events.length === 0 && (
+        <div className="alert alert-secondary py-2">
+          Todavía no hay eventos registrados para este partido.
+        </div>
+      )}
+
+      {events.length > 0 && (
+        <div className="table-responsive">
+          <table className="table table-sm table-bordered align-middle admin-match-events-table">
+            <thead>
+              <tr className="table-light">
+                <th>Lado</th>
+                <th>Min</th>
+                <th>Tipo</th>
+                <th>Jugador (entra)</th>
+                <th>Jugador (sale)</th>
+                <th>Detalle</th>
+                <th aria-label="Acciones"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {events.map((ev, idx) => {
+                const players = ev.side === "home" ? playersHome : playersAway;
+                const isSub = ev.type === "sub_in";
+
+                return (
+                  <tr key={idx}>
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={ev.side}
+                        onChange={(e) =>
+                          updateEvent(idx, { side: e.target.value })
+                        }
+                      >
+                        <option value="home">Local</option>
+                        <option value="away">Visitante</option>
+                      </select>
+                    </td>
+
+                    <td width="80">
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-control form-control-sm"
+                        value={ev.minute}
+                        onChange={(e) =>
+                          updateEvent(idx, { minute: e.target.value })
+                        }
+                      />
+                    </td>
+
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={ev.type}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          const patch = { type: newType };
+
+                          if (newType !== "sub_in") {
+                            patch.related_player_id = "";
+                          }
+
+                          updateEvent(idx, patch);
+                        }}
+                      >
+                        <option value="">—</option>
+                        {EVENT_TYPES.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={ev.player_id}
+                        onChange={(e) =>
+                          updateEvent(idx, { player_id: e.target.value })
+                        }
+                      >
+                        <option value="">—</option>
+                        {players.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={ev.related_player_id}
+                        onChange={(e) =>
+                          updateEvent(idx, {
+                            related_player_id: e.target.value,
+                          })
+                        }
+                        disabled={
+                          !isSub ||
+                          (ev.related_player_id !== "" &&
+                            ev.related_player_id !== null)
+                        }
+                      >
+                        <option value="">—</option>
+                        {players.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      <input
+                        className="form-control form-control-sm"
+                        value={ev.detail}
+                        onChange={(e) =>
+                          updateEvent(idx, { detail: e.target.value })
+                        }
+                      />
+                    </td>
+
+                    <td width="50">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => removeEvent(idx)}
+                        aria-label="Eliminar evento"
+                      >
+                        X
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="admin-match-page-footer">
+        <button
+          className="btn btn-primary"
+          disabled={saving}
+          onClick={handleSave}
+        >
+          {saving ? "Guardando…" : "Guardar cambios"}
+        </button>
+      </div>
     </div>
   );
 }

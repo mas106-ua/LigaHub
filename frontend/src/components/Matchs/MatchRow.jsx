@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import MatchStatusBadge from "./MatchStatusBadge";
 
 const fmt = (iso) => {
@@ -46,6 +47,13 @@ export default function MatchRow({ m }) {
       <div className="match-row__aside">
         <div className="match-row__score">{score}</div>
         <MatchStatusBadge status={m.status} />
+
+        <Link
+          to={`/partido/${m.id}`}
+          className="btn btn-outline-primary btn-sm match-row__detail-link"
+        >
+          Ver partido
+        </Link>
       </div>
     </li>
   );

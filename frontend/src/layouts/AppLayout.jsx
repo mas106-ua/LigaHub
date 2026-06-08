@@ -254,8 +254,7 @@ export default function AppLayout() {
                 className="app-brand__logo"
               />
               <span className="app-brand__text">
-                <strong>TFG Fútbol</strong>
-                <small>Competiciones y ligas</small>
+                <strong>LigaHub</strong>
               </span>
             </Link>
           </div>
